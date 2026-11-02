@@ -1,0 +1,53 @@
+Patch 0004 (Seastones Rig, SP-S3B): device registration.
+When built as the engine (SEASTONES_ENGINE), sim_devices lists only the devices
+the engine contains (CPU and its display, selector channel, PIC, LFC, and our
+KEYS X'20', DAC X'21', GATE X'22' from src/engine/devices/id_seastones.c) and the
+binary loader is absent, so no peripheral source file is linked. Stock builds
+are unchanged.
+
+--- a/Interdata/id16_sys.c
++++ b/Interdata/id16_sys.c
+@@ -43,6 +43,9 @@
+ extern DEVICE pic_dev, lfc_dev;
+ extern DEVICE dp_dev, idc_dev;
+ extern DEVICE fd_dev, mt_dev;
++#if defined (SEASTONES_ENGINE)                          /* patch 0004 */
++extern DEVICE sx_keys_dev, sx_dac_dev, sx_gate_dev;
++#endif
+ extern UNIT cpu_unit;
+ extern REG cpu_reg[];
+ extern uint16 *M;
+@@ -73,6 +76,11 @@
+     &sch_dev,
+     &pic_dev,
+     &lfc_dev,
++#if defined (SEASTONES_ENGINE)                          /* patch 0004: the */
++    &sx_keys_dev,                                       /* engine's devices: */
++    &sx_dac_dev,                                        /* KEYS X'20', DAC X'21', */
++    &sx_gate_dev,                                       /* GATE X'22' */
++#else
+     &pt_dev,
+     &tt_dev,
+     &ttp_dev,
+@@ -83,6 +91,7 @@
+     &idc_dev,
+     &fd_dev,
+     &mt_dev,
++#endif                                                  /* end patch 0004 */
+     NULL
+     };
+ 
+@@ -100,9 +109,13 @@
+ 
+ t_stat sim_load (FILE *fileref, char *cptr, char *fnam, int flag)
+ {
++#if defined (SEASTONES_ENGINE)                          /* patch 0004: no */
++return SCPE_NOFNC;                                      /* peripherals, so */
++#else                                                   /* no loaders */
+ if (flag)
+     return pt_dump (fileref, cptr, fnam);
+ return lp_load (fileref, cptr, fnam);
++#endif
+ }
+ 
+ /* Symbol tables */

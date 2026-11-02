@@ -1,0 +1,222 @@
+{
+  "schema": "seastones.patch/1",
+  "slug": "sweep",
+  "map": "all-da-4",
+  "auth": "authentic",
+  "program": {
+    "routine": "play"
+  },
+  "templates": {
+    "voice": {
+      "modules": [
+        {
+          "id": "osc",
+          "type": "vco"
+        },
+        {
+          "id": "osc2",
+          "type": "vco",
+          "params": {
+            "fine": 0.1,
+            "width": 0.4
+          }
+        },
+        {
+          "id": "vm",
+          "type": "mixer",
+          "params": {
+            "l1": 0.5,
+            "l2": 0.35
+          }
+        },
+        {
+          "id": "flt",
+          "type": "vcf",
+          "params": {
+            "cutoff": 5.0,
+            "res": 0.72,
+            "track": 1.0
+          }
+        },
+        {
+          "id": "eg",
+          "type": "env",
+          "params": {
+            "attack": 0.05,
+            "decay": 1.0,
+            "sustain": 0.85,
+            "release": 1.2
+          }
+        },
+        {
+          "id": "amp",
+          "type": "vca"
+        }
+      ],
+      "cables": [
+        [
+          "$pitch",
+          "osc.pitch"
+        ],
+        [
+          "$pitch",
+          "osc2.pitch"
+        ],
+        [
+          "$gate",
+          "eg.gate"
+        ],
+        [
+          "osc.saw",
+          "vm.in1"
+        ],
+        [
+          "osc2.pulse",
+          "vm.in2"
+        ],
+        [
+          "vm.out",
+          "flt.in"
+        ],
+        [
+          "flt.lp",
+          "amp.in"
+        ],
+        [
+          "eg.out",
+          "amp.cv"
+        ],
+        [
+          "amp.out",
+          "$out"
+        ]
+      ]
+    }
+  },
+  "voices": {
+    "template": "voice",
+    "count": 4,
+    "pitch": "dac.{i}",
+    "gate": "dac.{i+4}",
+    "out": "mix{i%2}.in{i/2+1}"
+  },
+  "modules": [
+    {
+      "id": "lfo",
+      "type": "lfo",
+      "params": {
+        "rate": -2.0,
+        "level": 3.0
+      }
+    },
+    {
+      "id": "mix0",
+      "type": "mixer",
+      "params": {
+        "l1": 0.8,
+        "l2": 0.8
+      }
+    },
+    {
+      "id": "mix1",
+      "type": "mixer",
+      "params": {
+        "l1": 0.8,
+        "l2": 0.8
+      }
+    },
+    {
+      "id": "send",
+      "type": "mixer",
+      "params": {
+        "l1": 0.5,
+        "l2": 0.5
+      }
+    },
+    {
+      "id": "echo",
+      "type": "echo",
+      "params": {
+        "time": 0.4,
+        "feedback": 0.38,
+        "mix": 1.0,
+        "tone": 3000.0
+      }
+    },
+    {
+      "id": "busl",
+      "type": "mixer",
+      "params": {
+        "l1": 1.0,
+        "l2": 0.35,
+        "l3": 0.45
+      }
+    },
+    {
+      "id": "busr",
+      "type": "mixer",
+      "params": {
+        "l1": 1.0,
+        "l2": 0.35,
+        "l3": 0.45
+      }
+    },
+    {
+      "id": "out",
+      "type": "out",
+      "params": {
+        "level": 0.9
+      }
+    }
+  ],
+  "cables": [
+    [
+      "lfo.tri",
+      "flt*.cutoff"
+    ],
+    [
+      "mix0.out",
+      "send.in1"
+    ],
+    [
+      "mix1.out",
+      "send.in2"
+    ],
+    [
+      "send.out",
+      "echo.in"
+    ],
+    [
+      "mix0.out",
+      "busl.in1"
+    ],
+    [
+      "echo.l",
+      "busl.in2"
+    ],
+    [
+      "mix1.out",
+      "busl.in3"
+    ],
+    [
+      "mix1.out",
+      "busr.in1"
+    ],
+    [
+      "echo.r",
+      "busr.in2"
+    ],
+    [
+      "mix0.out",
+      "busr.in3"
+    ],
+    [
+      "busl.out",
+      "out.l"
+    ],
+    [
+      "busr.out",
+      "out.r"
+    ]
+  ]
+}

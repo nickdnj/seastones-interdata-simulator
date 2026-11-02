@@ -1,0 +1,13 @@
+# UBSan ignore list for the vendored SIMH files ONLY (VS-01, CNF-12). Our own code gets
+# no entries here. Each entry names the upstream site, and why it is not a defect of the
+# engine. Found by scripts/sanitize.sh over 20 S-3 streams x 3*10^5 instructions: this is
+# the only UBSan site in the vendored code, and ASan found nothing.
+
+[shift-base]
+# Interdata/id16_cpu.c, display(), line 1743 at the pin:
+#     DR = (DR & ~(DMASK8 << (drpos * 8))) | (dat << (drpos * 8));
+# DMASK8 is the int constant 0xFF, so for drpos 3 the shift puts a 1 into the sign bit of
+# an int: undefined in ISO C. Clang and GCC both produce 0xFF000000, and stock id16 is
+# compiled from the same line, so the lockstep compares like with like. It is an upstream
+# issue and not ours to patch (patches are limited to clocking, timing, idle and devices).
+fun:display

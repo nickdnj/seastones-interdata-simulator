@@ -1,0 +1,11 @@
+[Unit]
+# The nightly clean restart (KIOSK-3, SYS-05): rigd from cold, then a fresh page. Not a reboot.
+Description=The 1974 Seastones Rig: nightly clean restart
+Documentation=file:/opt/seastones/docs/OPERATIONS.md
+
+[Service]
+Type=oneshot
+Environment=SX_DATA=/data
+# the timer spreads the start already (RandomizedDelaySec)
+Environment=SX_RESET_NO_DELAY=1
+ExecStart=/opt/seastones/deploy/reset.sh

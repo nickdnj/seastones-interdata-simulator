@@ -1,0 +1,65 @@
+{
+  "$comment": "rigd's messages beyond the visitor and staff protocol (protocol-v1.json, which the page and the fake engine share and which must stay byte-identical to tests/web/fake-engine/schema/protocol-v1.json). PROPOSED by the host lane: passage.start (ENG-05: refused_gate while no passage is ready; CT-06) and test.inject (the test profile only, with --test-hooks; production answers unknown). The staff messages are the UI lane's, adopted into protocol-v1.json in round 4. Same schema subset and $ref rules as protocol-v1.json; $ref may also name protocol-v1 definitions.",
+  "id": "seastones.rigd/1",
+  "definitions": {},
+  "server": {},
+  "client": {
+    "passage.start": {
+      "type": "object",
+      "required": [
+        "v",
+        "t",
+        "id",
+        "slug"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "t": {
+          "const": "passage.start"
+        },
+        "id": {
+          "$ref": "id"
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        }
+      }
+    },
+    "test.inject": {
+      "type": "object",
+      "required": [
+        "v",
+        "t",
+        "id",
+        "what"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "t": {
+          "const": "test.inject"
+        },
+        "id": {
+          "$ref": "id"
+        },
+        "what": {
+          "type": "string",
+          "enum": [
+            "nan",
+            "inf",
+            "freeze_audio",
+            "thaw_audio",
+            "unplug_audio",
+            "late_callbacks"
+          ]
+        }
+      }
+    }
+  }
+}

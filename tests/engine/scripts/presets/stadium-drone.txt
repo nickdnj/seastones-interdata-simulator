@@ -1,0 +1,7 @@
+# stadium-drone: A slow, wide chord: C3 E3 G3 B3 swelling in, then D3 A3 D4, then the release and echo tail.
+# seconds 14
+0.00 keys 0
+0.30 keys 891
+5.00 keys 0
+5.40 keys 4204
+8.60 keys 0

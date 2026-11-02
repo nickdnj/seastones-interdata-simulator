@@ -1,0 +1,4 @@
+# Vendored open-simh files are stored byte for byte as upstream ships them (CRLF line
+# endings included); their SHA-256 is pinned in src/engine/simh/PROVENANCE.md. Never let
+# git convert them, and never diff them as text with EOL normalisation.
+src/engine/simh/** -text

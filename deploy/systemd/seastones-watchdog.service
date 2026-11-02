@@ -1,0 +1,15 @@
+[Unit]
+# Watchdog layer 2 (ARCHITECTURE 10, SYS-06): the page is running but has stopped painting.
+# deploy/watchdog.py restarts the browser when the page heartbeat has not changed for
+# HEARTBEAT_STALE_S on the monotonic clock (a wall-clock jump never counts, SOK-08).
+# Root, because the browser belongs to the kiosk user. No network: it reads one file.
+Description=The 1974 Seastones Rig: page-heartbeat watchdog
+Documentation=file:/opt/seastones/docs/OPERATIONS.md
+PartOf=seastones-station.target
+
+[Service]
+Type=oneshot
+Environment=SX_DATA=/data
+ExecStart=/usr/bin/python3 /opt/seastones/deploy/watchdog.py --run /run/seastones --conf /opt/seastones/deploy/station.conf --restart /opt/seastones/deploy/restart-browser.sh --log /data/log/kiosk.log
+PrivateNetwork=yes
+NoNewPrivileges=yes

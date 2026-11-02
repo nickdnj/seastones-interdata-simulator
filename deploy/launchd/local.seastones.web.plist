@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The page server on macOS (template; see local.seastones.rigd.plist). Loopback only. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.web</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PYTHON@</string>
+		<string>@DEST@/deploy/supervise.py</string>
+		<string>--name</string>
+		<string>web</string>
+		<string>--log</string>
+		<string>@DATA@/log/web.log</string>
+		<string>--log-max-kb</string>
+		<string>@LOG_MAX_KB@</string>
+		<string>--log-keep</string>
+		<string>@LOG_KEEP@</string>
+		<string>--restart-sec</string>
+		<string>2</string>
+		<string>--pidfile</string>
+		<string>@DATA@/run/web.pid</string>
+		<string>--</string>
+		<string>@PYTHON@</string>
+		<string>@DEST@/src/web/serve.py</string>
+		<string>--host</string>
+		<string>127.0.0.1</string>
+		<string>--port</string>
+		<string>8080</string>
+		<string>--content</string>
+		<string>@DATA@/content</string>
+		<string>--index-dir</string>
+		<string>@DATA@/run/content</string>
+		<string>--program</string>
+		<string>@DEST@/build/prod/program</string>
+		<string>--run</string>
+		<string>@DATA@/run</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PYTHONPATH</key>
+		<string>@DEST@/src</string>
+		<key>PYTHONUNBUFFERED</key>
+		<string>1</string>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>@DEST@</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>1</integer>
+	<key>ExitTimeOut</key>
+	<integer>5</integer>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>@DATA@/log/supervise-web.err</string>
+</dict>
+</plist>

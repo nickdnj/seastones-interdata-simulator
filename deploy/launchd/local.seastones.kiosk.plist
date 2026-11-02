@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The kiosk browser on macOS (template; see local.seastones.rigd.plist): kiosk.sh waits for
+     the page server, then execs Chrome or Chromium with kiosk flags. When the browser exits or
+     the page watchdog closes it, the supervisor opens it again 3 s later. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.kiosk</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PYTHON@</string>
+		<string>@DEST@/deploy/supervise.py</string>
+		<string>--name</string>
+		<string>kiosk</string>
+		<string>--log</string>
+		<string>@DATA@/log/kiosk.log</string>
+		<string>--log-max-kb</string>
+		<string>@LOG_MAX_KB@</string>
+		<string>--log-keep</string>
+		<string>@LOG_KEEP@</string>
+		<string>--restart-sec</string>
+		<string>3</string>
+		<string>--pidfile</string>
+		<string>@DATA@/run/kiosk.pid</string>
+		<string>--</string>
+		<string>/bin/bash</string>
+		<string>@DEST@/deploy/kiosk.sh</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>SX_DEST</key>
+		<string>@DEST@</string>
+		<key>SX_DATA</key>
+		<string>@DATA@</string>
+		<key>SX_PYTHON</key>
+		<string>@PYTHON@</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>3</integer>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>@DATA@/log/supervise-kiosk.err</string>
+</dict>
+</plist>

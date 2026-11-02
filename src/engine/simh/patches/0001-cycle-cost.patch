@@ -1,0 +1,48 @@
+Patch 0001 (Seastones Rig, SP-S3B; VS-02): cycle-cost hooks.
+The interval decrement moves from before the fetch to just after the opcode is
+decoded, and costs SX_CYC (op) instead of 1; after the operand is decoded,
+SX_CYC_X (op, r1, r2, opnd, cc) adds what depends on it (a taken branch, a shift
+count, registers moved). Both run before the opcode dispatch, so nothing in it
+changes. Without definitions SX_CYC is 1 and SX_CYC_X is 0, so the CPU counts
+exactly as stock; the engine build includes src/engine/machine/cycles.h, whose
+table is also all-stock until sx_cycles_configure selects cycle mode.
+
+--- a/Interdata/id16_cpu.c
++++ b/Interdata/id16_cpu.c
+@@ -142,6 +142,16 @@
+ */
+ 
+ #include "id_defs.h"
++
++#if defined (SEASTONES_ENGINE)                          /* patch 0001: cycle-cost */
++#include "cycles.h"                                     /* engine cycle table */
++#endif
++#if !defined (SX_CYC)                                   /* patch 0001: cycle-cost */
++#define SX_CYC(op)      1                               /* hook; stock = 1 per instr */
++#endif
++#if !defined (SX_CYC_X)                                 /* taken branch, shift count, */
++#define SX_CYC_X(op,r1,r2,opnd,cc) 0                    /* regs moved; stock = 0 */
++#endif
+ 
+ #define PCQ_SIZE        64                              /* must be 2**n */
+ #define PCQ_MASK        (PCQ_SIZE - 1)
+@@ -660,10 +670,9 @@
+         break;
+         }
+ 
+-    sim_interval = sim_interval - 1;
+-
+     ir1 = ReadH (oPC = PC);                             /* fetch instr */
+     op = (ir1 >> 8) & 0xFF;                             /* isolate op, R1, R2 */
++    sim_interval = sim_interval - SX_CYC (op);          /* patch 0001: cycle cost */
+     r1 = (ir1 >> 4) & 0xF;
+     r2 = ir1 & 0xF;
+     drom = decrom[op];
+@@ -732,6 +741,7 @@
+             hst_p = 0;
+         }
+ 
++    sim_interval = sim_interval - SX_CYC_X (op, r1, r2, opnd, cc); /* patch 0001 */
+     PC = (PC + 2) & VAMASK;                             /* increment PC */
+     switch (op) {                                       /* case on opcode */
+ 

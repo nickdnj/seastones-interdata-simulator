@@ -1,0 +1,11 @@
+# Python lint and format (DEV-PLAN 7.1): written for 3.12, compatible with 3.13.
+target-version = "py312"
+line-length = 100
+extend-exclude = ["src/engine/simh", "build", ".claude"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[format]
+quote-style = "double"

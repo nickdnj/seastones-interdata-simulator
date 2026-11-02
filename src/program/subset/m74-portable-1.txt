@@ -1,0 +1,113 @@
+# m74-portable-1: the portable instruction subset (MACH-6, P2-1; ARCHITECTURE 5.7; SP-S5)
+#
+# STATUS: checked against the Model 74 manual's instruction list, PENDING Nick's read of the scan.
+#
+# Source: Interdata "New Series Models 74/70/80 User's Manual", publication 29-261R01 (Feb 1973),
+#   Appendix 1 (alphabetical instruction list, printed pp. A1-1 to A1-4) and Appendix 2 (numerical
+#   list, pp. A2-1 to A2-4). Entries marked ** carry the footnote "Models 70, 80 only".
+#   Appendix 5 (execution times, Model 74 table pp. A5-1 to A5-2) was used as a second check.
+#   http://www.bitsavers.org/pdf/interdata/16bit/29-261R01_UsersManual_Feb73.pdf
+# Read from archive.org OCR text of the scan (bitsavers_interdata1nualFeb73_25321432), not the page
+# images. See docs/qa/results/M1/S5.md for the changes from the provisional subset and the open points.
+#
+# Rule: SIMH's 716 class (113 instructions, Interdata/id16_cpu.c decrom[] at the pin), minus
+#   - floating point, 13 (29-261R01 App.1: Models 70, 80 only; ARCHITECTURE 5.7)
+#   - list processing ATL ABL RTL RBL (App.1: Models 70, 80 only; ARCHITECTURE 5.7)
+#   - block I/O WBR RBR WB RB (App.1: Models 70, 80 only; ADDED by S-5)
+#   - SVC SINT (on the Model 74 per App.1, but left out by design: ARCHITECTURE 5.7)
+# = 90 instructions. Auto-I/O and the PSW AIO/SQI/PRO bits are features, not instructions; the
+# program does not use them (polled I/O only).
+# Extended branch mnemonics (BE, BNZ, B, BZS, ...) are assembler aliases of BTC/BFC/BTCR/BFCR and
+# BTBS/BTFS/BFBS/BFFS and are allowed wherever their base instruction is.
+#
+# Columns: mnemonic (SIMH spelling), primary opcode byte (hex), form.
+BALR  01  RR
+BTCR  02  RR
+BFCR  03  RR
+NHR   04  RR
+CLHR  05  RR
+OHR   06  RR
+XHR   07  RR
+LHR   08  RR
+CHR   09  RR
+AHR   0A  RR
+SHR   0B  RR
+MHR   0C  RR
+DHR   0D  RR
+ACHR  0E  RR
+SCHR  0F  RR
+BTBS  20  SF
+BTFS  21  SF
+BFBS  22  SF
+BFFS  23  SF
+LIS   24  SF
+LCS   25  SF
+AIS   26  SF
+SIS   27  SF
+STH   40  RX
+BAL   41  RX
+BTC   42  RX
+BFC   43  RX
+NH    44  RX
+CLH   45  RX
+OH    46  RX
+XH    47  RX
+LH    48  RX
+CH    49  RX
+AH    4A  RX
+SH    4B  RX
+MH    4C  RX
+DH    4D  RX
+ACH   4E  RX
+SCH   4F  RX
+AHM   61  RX
+SRLS  90  SF
+SLLS  91  SF
+STBR  92  RR
+LBR   93  RR
+EXBR  94  RR
+EPSR  95  RR
+WHR   98  RR
+RHR   99  RR
+WDR   9A  RR
+RDR   9B  RR
+MHUR  9C  RR
+SSR   9D  RR
+OCR   9E  RR
+AIR   9F  RR
+BXH   C0  RX
+BXLE  C1  RX
+LPSW  C2  RX
+THI   C3  RS
+NHI   C4  RS
+CLHI  C5  RS
+OHI   C6  RS
+XHI   C7  RS
+LHI   C8  RS
+CHI   C9  RS
+AHI   CA  RS
+SHI   CB  RS
+SRHL  CC  RS
+SLHL  CD  RS
+SRHA  CE  RS
+SLHA  CF  RS
+STM   D0  RX
+LM    D1  RX
+STB   D2  RX
+LB    D3  RX
+CLB   D4  RX
+AL    D5  RX
+WH    D8  RX
+RH    D9  RX
+WD    DA  RX
+RD    DB  RX
+MHU   DC  RX
+SS    DD  RX
+OC    DE  RX
+AI    DF  RX
+RRL   EA  RS
+RLL   EB  RS
+SRL   EC  RS
+SLL   ED  RS
+SRA   EE  RS
+SLA   EF  RS

@@ -1,0 +1,9 @@
+# Research analysis toolkit (RS-04). Developer and research machines only; never on the
+# station image (research/ is never copied into it). Versions the toolkit was tested with
+# on 2026-10-31 (Python 3.12, macOS arm64).
+librosa==1.0.0
+scipy==1.18.1
+numpy==2.5.4
+nbformat==5.11.1
+nbstripout==0.9.1
+pytest

@@ -1,0 +1,14 @@
+[Unit]
+Description=The 1974 Seastones Rig: check the page heartbeat every 30 s
+PartOf=seastones-station.target
+
+[Timer]
+# Two minutes after boot before the first look: X, the server, the browser and the first paint
+# come first, and watchdog.py has its own boot grace on top of this.
+OnBootSec=120
+OnUnitActiveSec=30
+AccuracySec=5s
+Unit=seastones-watchdog.service
+
+[Install]
+WantedBy=timers.target

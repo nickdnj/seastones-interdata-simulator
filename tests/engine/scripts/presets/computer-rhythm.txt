@@ -1,0 +1,7 @@
+# computer-rhythm: Hold F3: the computer plays its pattern; then C3 takes over the pattern; then silence.
+# seconds 12.5
+0.00 keys 0
+0.20 keys 20
+4.20 keys 0
+4.50 keys 1
+8.50 keys 0

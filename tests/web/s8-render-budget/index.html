@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- S-8a render-budget spike page (SP-S8A). Throwaway; fed by a SYNTHETIC generator. Never shipped. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S-8a render budget (synthetic feed)</title>
+<style>
+  html, body { margin: 0; background: #14110d; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; }
+  #art, #live { position: absolute; left: 0; top: 0; }
+  #banner { position: absolute; right: 24px; top: 16px; font: 600 22px system-ui, sans-serif;
+            color: #ffb000; background: #000a; padding: 6px 12px; border: 2px solid #ffb000; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="art" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true"></svg>
+  <canvas id="live" width="1920" height="1080"></canvas>
+  <div id="banner">SYNTHETIC FEED: render-budget spike, not the machine</div>
+</div>
+<script type="module" src="./render.js"></script>
+</body>
+</html>

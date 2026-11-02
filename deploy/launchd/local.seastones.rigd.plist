@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- rigd on macOS (a template: scripts/install-station.sh fills the @NAMES@ and installs it in
+     /Library/LaunchAgents). It runs in the kiosk user's login session, because that is where
+     CoreAudio and CoreMIDI are. launchd restarts the supervisor if it exits (KeepAlive); the
+     supervisor restarts rigd and kills it when its WATCHDOG=1 heartbeat stops (launchd has no
+     watchdog of its own), and rotates its log. At logout or shutdown launchd sends SIGTERM:
+     rigd ramps to silence and closes the device (safe shutdown). -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.rigd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PYTHON@</string>
+		<string>@DEST@/deploy/supervise.py</string>
+		<string>--name</string>
+		<string>rigd</string>
+		<string>--log</string>
+		<string>@DATA@/log/rigd.log</string>
+		<string>--log-max-kb</string>
+		<string>@LOG_MAX_KB@</string>
+		<string>--log-keep</string>
+		<string>@LOG_KEEP@</string>
+		<string>--restart-sec</string>
+		<string>1</string>
+		<string>--watchdog-sec</string>
+		<string>@RIGD_WATCHDOG_SEC@</string>
+		<string>--pidfile</string>
+		<string>@DATA@/run/rigd.pid</string>
+		<string>--</string>
+		<string>@PYTHON@</string>
+		<string>-m</string>
+		<string>rigd</string>
+		<string>--build</string>
+		<string>@DEST@/build/prod</string>
+		<string>--content</string>
+		<string>@DATA@/content</string>
+		<string>--data</string>
+		<string>@DATA@</string>
+		<string>--staff-pin-file</string>
+		<string>@DATA@/staff-pin</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PYTHONPATH</key>
+		<string>@DEST@/src</string>
+		<key>PYTHONUNBUFFERED</key>
+		<string>1</string>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>@DEST@</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>1</integer>
+	<key>ExitTimeOut</key>
+	<integer>5</integer>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>@DATA@/log/supervise-rigd.err</string>
+</dict>
+</plist>

@@ -1,0 +1,71 @@
+# Original demo score for the rig's score player (VS-21): written for this exhibit, from no
+# recording and no existing piece (SEA-4). A slow two-chord drone with a stepped line above it;
+# the computer ramps the filter open and closed and nudges the tuning in steps, so the tape
+# shows everything the player does: notes, voltages, ramps, triggers and a loop.
+score: 1
+title: Tide clock
+status: draft-hidden
+origin: original
+kind: pattern
+tick: 10ms
+voices: 3
+technique: two held chord tones and a five-note stepped line; programmed cutoff ramps (the computer's own zipper) and a detune step every bar; the whole loops after 16 seconds
+
+@0     cv    d8   0x1000
+@0     cv    d13  0x0000
+@0     note  v0   C3
+@0     note  v1   G3
+@0     ramp  d8   0x6000  steps 64  over 400
+@50    note  v2   E4
+@100   off   v2
+@100   note  v2   G4
+@150   off   v2
+@150   note  v2   D5
+@200   off   v2
+@200   note  v2   C5
+@200   cv    d13  0x0200
+@250   off   v2
+@250   note  v2   A4
+@300   off   v2
+@400   ramp  d8   0x1800  steps 48  over 400
+@400   trig  g8
+@400   off   v0
+@400   note  v0   A2
+@400   off   v1
+@400   note  v1   E3
+@450   note  v2   C5
+@500   off   v2
+@500   note  v2   B4
+@550   off   v2
+@550   note  v2   G4
+@600   cv    d13  0x0000
+@600   off   v2
+@600   note  v2   E4
+@700   off   v2
+@800   ramp  d8   0x5000  steps 32  over 400
+@800   trig  g8
+@800   off   v0
+@800   note  v0   F2
+@800   off   v1
+@800   note  v1   C3
+@850   note  v2   A4
+@900   off   v2
+@900   note  v2   C5
+@1000  off   v2
+@1000  note  v2   F5
+@1100  off   v2
+@1200  ramp  d8   0x1000  steps 40  over 400
+@1200  trig  g8
+@1200  off   v0
+@1200  note  v0   G2
+@1200  off   v1
+@1200  note  v1   D3
+@1250  note  v2   B4
+@1300  off   v2
+@1300  note  v2   D5
+@1400  off   v2
+@1400  note  v2   G4
+@1500  off   v2
+@1600  off   v0
+@1600  off   v1
+@1600  loop  @0

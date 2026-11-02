@@ -1,0 +1,21 @@
+Self-hosted typefaces for the Seastones Rig page (DESIGN-SYSTEM 3, KIOSK-6).
+
+The station is offline and the page makes no external request; these files are why.
+Licence for all four families: SIL Open Font License 1.1 (OFL), https://openfontlicense.org
+CT-12 (THIRD-PARTY-NOTICES) must list them.
+
+  Roboto Slab ExtraBold 800  Christian Robertson, Google. OFL 1.1. Display role.
+  Oswald                     Vernon Adams, Kalapi Gajjar, Cyreal. OFL 1.1. Label role.
+  IBM Plex Sans              Mike Abbink, Bold Monday, for IBM. OFL 1.1. Body role.
+  JetBrains Mono             JetBrains s.r.o. OFL 1.1. Mono role.
+
+Latin subsets. Oswald, IBM Plex Sans and JetBrains Mono are byte-identical to the Model 4
+kiosk's src/web/assets/fonts/ (so one fonts folder serves the museum); Roboto Slab was
+fetched on 2026-10-31 from Google Fonts.
+
+file                     sha256                                                            source
+-----------------------  ----------------------------------------------------------------  ------
+roboto-slab-800.woff2    bf7911a9ceaba6cdfaeab3604479dbc5e23579c0ff9c8df302d204474c2d0e0b  https://fonts.gstatic.com/s/robotoslab/v36/BngbUXZYTXPIvIBgJJSb6s3BzlRRfKOFbvjoDIOmb2RjV9Su1cai.woff2
+oswald.woff2             571f3457dab507b6f2ce5394d593ca015251b69fea81ab7a546bd2368e9fc3ed  https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlWHYg.woff2
+ibm-plex-sans.woff2      e2291e842cf5af167122a22881a740c7f2dda7716f1e8cd76680264f4a859470  https://fonts.gstatic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2
+jetbrains-mono.woff2     83c005d49d8a6a50474c73a5a36ac0468076e9c4a29da7bdb14995d80560a5be  https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2

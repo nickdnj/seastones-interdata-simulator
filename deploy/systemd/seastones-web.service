@@ -1,0 +1,51 @@
+[Unit]
+# The static server: the page, the content index and the program listing (ARCHITECTURE 4.1,
+# "Why the page is not served by rigd": rigd is the complicated process, and a page reloaded
+# against a dead origin would put Chromium's own error page on the glass). It imports nothing
+# from rigd, so a rigd crash leaves the page up to show its own error state (KIOSK-4).
+# The server itself is the UI lane's src/web/serve.py (CT-01).
+Description=The 1974 Seastones Rig: the page server (http://127.0.0.1:8080)
+Documentation=file:/opt/seastones/docs/ARCHITECTURE.md
+After=local-fs.target seastones-content.service
+StartLimitIntervalSec=0
+PartOf=seastones-station.target
+
+[Service]
+Type=simple
+User=seastones
+Group=seastones
+WorkingDirectory=/opt/seastones
+Environment=PYTHONPATH=/opt/seastones/src
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/seastones/src/web/serve.py --host 127.0.0.1 --port 8080 --content /data/content --index-dir /run/seastones/content --program /opt/seastones/build/prod/program --run /run/seastones
+Restart=always
+RestartSec=2
+
+RuntimeDirectory=seastones
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+
+# --- hardening ---------------------------------------------------------------------------
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+ReadWritePaths=-/data/counters /run/seastones
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressAllow=localhost
+IPAddressDeny=any
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+# Formatter for our C (src/engine, src/host, tests/engine). Never run it on
+# src/engine/simh/: vendored files stay byte-identical to the pin.
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+BreakBeforeBraces: Linux
+PointerAlignment: Right
+SortIncludes: Never

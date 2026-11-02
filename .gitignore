@@ -1,0 +1,33 @@
+.DS_Store
+*.swp
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+build/
+.env
+.env.local
+.claude/
+
+# --- RE-1 layer 1 (ARCHITECTURE 11.5): audio never enters git --------------
+# The pre-commit hook (scripts/check-private.py) and CI check the same list and
+# also check magic bytes, so renaming a file does not get it past them.
+*.wav
+*.flac
+*.mp3
+*.aiff
+*.aif
+*.m4a
+*.ogg
+*.shn
+*.opus
+*.ape
+# The private research folder, if anyone ever makes one inside the tree by
+# mistake. It belongs outside every git work tree (research/tools/env.py).
+research/private/
+
+# --- RIGHTS-6: Interdata binaries and tapes never enter git -----------------
+*.pt
+*.tape

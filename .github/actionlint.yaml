@@ -1,0 +1,4 @@
+self-hosted-runner:
+  # The bench runner (DEV-PLAN 7.4): described, not installed until SP-BUY.
+  labels:
+    - seastones-bench

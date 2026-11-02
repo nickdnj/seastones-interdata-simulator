@@ -1,0 +1,5 @@
+# sweep: A held chord C3 G3 C4 while the filter opens and closes on its own, slowly.
+# seconds 14
+0.00 keys 0
+0.20 keys 1081
+9.00 keys 0

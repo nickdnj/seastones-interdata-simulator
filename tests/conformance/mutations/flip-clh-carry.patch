@@ -1,0 +1,16 @@
+S-3 negative test (SP-S3C), NEVER applied to a real build.
+Flips one condition-code rule: CLHR/CLH/CLHI set C on equal operands as well as on
+borrow. Applied after 0001-0004 by `make engine BUILD=build/mutant SX_EXTRA_PATCHES=...`;
+tests/conformance/test_lockstep.py requires the lockstep to catch it.
+
+--- a/Interdata/id16_cpu.c
++++ b/Interdata/id16_cpu.c
+@@ -893,7 +893,7 @@
+     case 0xC5:                                          /* CLHI - RS */
+         rslt = (R[r1] - opnd) & DMASK16;                /* result */
+         CC_GL_16 (rslt);                                /* set G,L */
+-        if (R[r1] < opnd)                               /* set C if borrow */
++        if (R[r1] <= opnd)                              /* MUTANT: C on equal */
+             cc = cc | CC_C;
+         if (((R[r1] ^ opnd) & (~opnd ^ rslt)) & SIGN16)
+             cc = cc | CC_V;

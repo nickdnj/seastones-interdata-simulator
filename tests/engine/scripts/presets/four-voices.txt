@@ -1,0 +1,17 @@
+# four-voices: Four keys one after another, then a fifth and a sixth steal the oldest voices; a quick run.
+# seconds 8
+0.00 keys 0
+0.20 keys 1000
+0.50 keys 11000
+0.80 keys 91000
+1.10 keys 891000
+1.60 keys 4891000
+2.10 keys 14891000
+3.50 keys 0
+3.80 keys 1000000
+3.90 keys 4000000
+4.00 keys 10000000
+4.10 keys 20000000
+4.20 keys 80000000
+4.30 keys 200000000
+4.60 keys 0

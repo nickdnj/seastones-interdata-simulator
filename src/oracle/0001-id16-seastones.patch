@@ -1,0 +1,34 @@
+id16-seastones (VS-06, ARCHITECTURE 2.4 item 3): stock id16 at the pin plus OUR device file.
+Three changed lines: the makefile compiles Interdata/id_seastones.c (copied in, byte for
+byte, from src/engine/devices/), and id16_sys.c declares the three devices and adds them
+to the end of the stock sim_devices table. Nothing else in stock id16 changes.
+
+--- a/makefile
++++ b/makefile
+@@ -1464,7 +1464,7 @@
+ ID16 = ${ID16D}/id16_cpu.c ${ID16D}/id16_sys.c ${ID16D}/id_dp.c \
+ 	${ID16D}/id_fd.c ${ID16D}/id_fp.c ${ID16D}/id_idc.c ${ID16D}/id_io.c \
+ 	${ID16D}/id_lp.c ${ID16D}/id_mt.c ${ID16D}/id_pas.c ${ID16D}/id_pt.c \
+-	${ID16D}/id_tt.c ${ID16D}/id_uvc.c ${ID16D}/id16_dboot.c ${ID16D}/id_ttp.c
++	${ID16D}/id_tt.c ${ID16D}/id_uvc.c ${ID16D}/id16_dboot.c ${ID16D}/id_ttp.c ${ID16D}/id_seastones.c
+ ID16_OPT = -DIFP_IN_MEM -I ${ID16D}
+ 
+ 
+--- a/Interdata/id16_sys.c
++++ b/Interdata/id16_sys.c
+@@ -43,6 +43,7 @@
+ extern DEVICE pic_dev, lfc_dev;
+ extern DEVICE dp_dev, idc_dev;
+ extern DEVICE fd_dev, mt_dev;
++extern DEVICE sx_keys_dev, sx_dac_dev, sx_gate_dev;
+ extern UNIT cpu_unit;
+ extern REG cpu_reg[];
+ extern uint16 *M;
+@@ -83,6 +84,7 @@
+     &idc_dev,
+     &fd_dev,
+     &mt_dev,
++    &sx_keys_dev, &sx_dac_dev, &sx_gate_dev,
+     NULL
+     };
+ 

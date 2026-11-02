@@ -1,0 +1,16 @@
+# Synthetic test score: one voice, a stepped sweep on a D/A channel, a gate pulse loop.
+# Written by hand for the validator and compiler tests. Not based on any recording.
+score: 1
+title: Test stepped sweep
+status: draft-hidden
+origin: synthetic
+kind: test
+tick: 1ms
+voices: 1
+
+@0     note  v0  C3
+@0     cv    d8  0.00V
+@0     ramp  d8  5.00V  steps 20  over 500   # the program writes 20 stepped values
+@500   trig  g8
++250   off   v0
+@1000  end

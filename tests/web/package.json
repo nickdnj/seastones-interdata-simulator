@@ -1,0 +1,13 @@
+{
+  "name": "seastones-web-tests",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only test tooling for src/web (Playwright, node:test). Node is never a runtime dependency of the station (DEV-PLAN 7.1).",
+  "scripts": {
+    "test:isolation": "node --test fixture-isolation.test.mjs",
+    "s8": "node s8-render-budget/measure.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

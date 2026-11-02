@@ -1,0 +1,2 @@
+# AUDIO-5: a cold start, no command of any kind, then the first key (key 12, C4) at 0.5 s.
+0.50 keys 1000

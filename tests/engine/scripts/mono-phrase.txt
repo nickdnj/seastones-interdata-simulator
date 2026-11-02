@@ -1,0 +1,10 @@
+# A scripted phrase for the mono program v0 (golden render, VS-12). Times in seconds.
+# Key k is bit k; the lowest key held plays (BASENOTE 48, so key 12 is C4).
+0.00 keys 0
+0.10 keys 1000
+0.60 keys 0
+0.70 keys 81
+1.00 keys 80
+1.30 keys 0
+1.40 keys 1000000000
+1.80 keys 0

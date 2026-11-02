@@ -1,0 +1,6 @@
+# eight-voices: Eight voices on the eight-voice map: a stacked chord, then a ninth key steals the oldest.
+# seconds 5
+0.00 keys 0
+0.20 keys 1224891
+2.00 keys 11224891
+3.50 keys 0

@@ -1,0 +1,79 @@
+[Unit]
+# rigd: the rig engine host (ARCHITECTURE 4.1, 4.5, 8; ADR-002, ADR-006; VS-17).
+# One process holds the emulated 7/16, its devices, the synthesizer and the audio and MIDI
+# threads. If it dies, the kernel closes the PCM and the station is silent at once; systemd
+# starts it again. If it hangs, ALSA's stop threshold silences the output and WatchdogSec
+# kills it. Either way it is playable again within 10 s (NFR-4).
+Description=The 1974 Seastones Rig: rigd, the engine host (ws://127.0.0.1:7690)
+Documentation=file:/opt/seastones/docs/ARCHITECTURE.md
+After=sound.target local-fs.target seastones-content.service
+Wants=sound.target
+# `systemctl stop seastones-station.target` stops it too (docs/OPERATIONS.md)
+PartOf=seastones-station.target
+# Rate limiting is a [Unit] setting; in [Service] systemd ignores it and the default limit
+# (5 starts in 10 s, then give up) applies. A rigd that stops being restarted is a silent
+# exhibit, so it never gives up. (Lesson carried over from the Model 4 kiosk's units.)
+StartLimitIntervalSec=0
+StartLimitBurst=0
+
+[Service]
+# READY=1 once the engine runs; WATCHDOG=1 only while its frame counter advances and the
+# control loop is responsive (src/rigd/supervise.py, station.py).
+Type=notify
+NotifyAccess=main
+WatchdogSec=5
+# The watchdog's SIGABRT, then SIGKILL after 1 s: TimeoutAbortSec's default is TimeoutStopSec
+# (90 s), which would leave a hung rigd in place for a minute and a half.
+TimeoutAbortSec=1
+TimeoutStopSec=3
+Restart=always
+RestartSec=1
+
+User=seastones
+Group=audio
+WorkingDirectory=/opt/seastones
+Environment=PYTHONPATH=/opt/seastones/src
+Environment=PYTHONUNBUFFERED=1
+# The station's arguments. The staff PIN is only ever on the station (scripts/staff-pin.py
+# writes /data/staff-pin); with no file the staff screen cannot open, by design.
+# The station's device: /etc/default/seastones-rigd may override RIGD_ARGS (the ALSA
+# device name of the chosen interface, S-1b): RIGD_ARGS="--device hw:1,0 ..."
+Environment="RIGD_ARGS=--build /opt/seastones/build/prod --content /data/content --data /data --device hw:0,0 --rate 48000 --period 128 --periods 2 --staff-pin-file /data/staff-pin"
+EnvironmentFile=-/etc/default/seastones-rigd
+ExecStart=/usr/bin/python3 -m rigd $RIGD_ARGS
+KillMode=control-group
+KillSignal=SIGTERM
+
+# --- real time: the audio thread asks for SCHED_FIFO 70 (ARCHITECTURE 10) ----------------
+LimitRTPRIO=70
+LimitMEMLOCK=infinity
+# RestrictRealtime must stay off: it would forbid the audio thread's SCHED_FIFO.
+
+# --- hardening ---------------------------------------------------------------------------
+# PrivateDevices would hide /dev/snd, so the devices are listed instead: ALSA only.
+DevicePolicy=closed
+DeviceAllow=char-alsa rw
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+# /data/staff.conf and /data/presets/ (staff settings and saves); logs and counters
+ReadWritePaths=-/data
+# The ALSA sequencer and the WebSocket are all it talks to; loopback only, enforced by the
+# kernel as well as by rigd's bind address (KIOSK-6, OPS-5).
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+IPAddressAllow=localhost
+IPAddressDeny=any
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

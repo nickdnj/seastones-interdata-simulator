@@ -1,0 +1,196 @@
+{
+  "schema": "seastones.patch/1",
+  "slug": "two-voice-duet",
+  "map": "all-da-4",
+  "auth": "authentic",
+  "program": {
+    "routine": "play"
+  },
+  "templates": {
+    "voice": {
+      "modules": [
+        {
+          "id": "osc",
+          "type": "vco",
+          "params": {
+            "width": 0.35
+          }
+        },
+        {
+          "id": "flt",
+          "type": "vcf",
+          "params": {
+            "cutoff": 6.6,
+            "res": 0.35
+          }
+        },
+        {
+          "id": "eg",
+          "type": "env",
+          "params": {
+            "attack": 0.015,
+            "decay": 0.5,
+            "sustain": 0.55,
+            "release": 0.7
+          }
+        },
+        {
+          "id": "amp",
+          "type": "vca"
+        }
+      ],
+      "cables": [
+        [
+          "$pitch",
+          "osc.pitch"
+        ],
+        [
+          "$gate",
+          "eg.gate"
+        ],
+        [
+          "osc.pulse",
+          "flt.in"
+        ],
+        [
+          "flt.lp",
+          "amp.in"
+        ],
+        [
+          "eg.out",
+          "amp.cv"
+        ],
+        [
+          "amp.out",
+          "$out"
+        ]
+      ]
+    }
+  },
+  "voices": {
+    "template": "voice",
+    "count": 4,
+    "pitch": "dac.{i}",
+    "gate": "dac.{i+4}",
+    "out": "mix{i%2}.in{i/2+1}"
+  },
+  "modules": [
+    {
+      "id": "vib",
+      "type": "lfo",
+      "params": {
+        "rate": 2.3,
+        "level": 0.012
+      }
+    },
+    {
+      "id": "mix0",
+      "type": "mixer",
+      "params": {
+        "l1": 0.55,
+        "l2": 0.55
+      }
+    },
+    {
+      "id": "mix1",
+      "type": "mixer",
+      "params": {
+        "l1": 0.55,
+        "l2": 0.55
+      }
+    },
+    {
+      "id": "send",
+      "type": "mixer",
+      "params": {
+        "l1": 0.5,
+        "l2": 0.5
+      }
+    },
+    {
+      "id": "echo",
+      "type": "echo",
+      "params": {
+        "time": 0.18,
+        "feedback": 0.3,
+        "mix": 1.0,
+        "tone": 4000.0
+      }
+    },
+    {
+      "id": "busl",
+      "type": "mixer",
+      "params": {
+        "l1": 1.0,
+        "l2": 0.3,
+        "l3": 0.45
+      }
+    },
+    {
+      "id": "busr",
+      "type": "mixer",
+      "params": {
+        "l1": 1.0,
+        "l2": 0.3,
+        "l3": 0.45
+      }
+    },
+    {
+      "id": "out",
+      "type": "out",
+      "params": {
+        "level": 0.8
+      }
+    }
+  ],
+  "cables": [
+    [
+      "vib.sine",
+      "osc*.mod"
+    ],
+    [
+      "mix0.out",
+      "send.in1"
+    ],
+    [
+      "mix1.out",
+      "send.in2"
+    ],
+    [
+      "send.out",
+      "echo.in"
+    ],
+    [
+      "mix0.out",
+      "busl.in1"
+    ],
+    [
+      "echo.l",
+      "busl.in2"
+    ],
+    [
+      "mix1.out",
+      "busl.in3"
+    ],
+    [
+      "mix1.out",
+      "busr.in1"
+    ],
+    [
+      "echo.r",
+      "busr.in2"
+    ],
+    [
+      "mix0.out",
+      "busr.in3"
+    ],
+    [
+      "busl.out",
+      "out.l"
+    ],
+    [
+      "busr.out",
+      "out.r"
+    ]
+  ]
+}

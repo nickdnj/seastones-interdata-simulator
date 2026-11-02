@@ -1,0 +1,87 @@
+# Every-push stage (DEV-PLAN 7.4, QA-STRATEGY 12.1). Budget: under 10 minutes.
+#
+# Every step is a `make` target,
+# so `make ci` on a laptop runs the same list; no job carries logic of its own.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      - run: make lint
+
+  private-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make private-check
+      - run: make private-check-range BASE="${{ github.event.before }}"
+      # the rights gate G1 over a staged install, and THIRD-PARTY-NOTICES up to date (CT-05, CT-12)
+      - run: make notices-check
+      - run: make release-rights
+
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      - run: make test
+
+  conformance:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      # The oracle and the pinned source are cached on the hash of the pin.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/seastones
+          key: oracle-${{ runner.os }}-${{ hashFiles('deploy/simh.pin') }}
+      - run: make oracle
+      - run: make engine
+      - run: make conformance
+
+  # The page (UI lane): fake-engine node tests, the fake-vs-real CPU check and Playwright on
+  # the fake engine, exactly `make web-test`. Node and Chromium are dev-only tools; neither
+  # ships on the station (DEV-PLAN 7.1). Playwright is pinned by tests/web/package-lock.json.
+  # WEB_CI=1 (tests/web/web.mk) takes Node 22 from the runner's tool cache and installs
+  # Chromium with its Linux libraries; no setup-node, as tests/ci/test_workflows.py requires.
+  web-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: web-${{ runner.os }}-${{ hashFiles('tests/web/package-lock.json') }}
+      - run: make web-test WEB_CI=1

@@ -1,0 +1,14 @@
+[Unit]
+# The whole station as one name (ADR-006): `systemctl start|stop|restart seastones-station.target`
+# starts or stops the engine host, the page server, the page watchdog, the nightly restart and the
+# boot-to-playable record together. The browser is not a unit: it is the .xinitrc loop on the
+# console (one start path for the display, Model 4 lesson); the watchdog and the nightly restart
+# reach it through deploy/restart-browser.sh.
+Description=The 1974 Seastones Rig: the whole station
+Documentation=file:/opt/seastones/docs/OPERATIONS.md
+Wants=seastones-rigd.service seastones-web.service seastones-playable.service
+Wants=seastones-watchdog.timer seastones-reset.timer
+After=seastones-rigd.service seastones-web.service
+
+[Install]
+WantedBy=multi-user.target

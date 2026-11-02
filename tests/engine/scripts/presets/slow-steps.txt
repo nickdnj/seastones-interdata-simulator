@@ -1,0 +1,5 @@
+# slow-steps: Hold C3 and C4: the tuning moves in 3-cent steps every 60 ms; the tone slowly brightens.
+# seconds 15
+0.00 keys 0
+0.20 keys 1001
+9.50 keys 0

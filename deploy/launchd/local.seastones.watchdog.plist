@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The page-heartbeat watchdog on macOS, every 30 s (template; see deploy/watchdog.py). -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.watchdog</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PYTHON@</string>
+		<string>@DEST@/deploy/watchdog.py</string>
+		<string>--run</string>
+		<string>@DATA@/run</string>
+		<string>--conf</string>
+		<string>@DEST@/deploy/station.conf</string>
+		<string>--restart</string>
+		<string>@DEST@/deploy/restart-browser.sh</string>
+		<string>--log</string>
+		<string>@DATA@/log/kiosk.log</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>SX_DATA</key>
+		<string>@DATA@</string>
+	</dict>
+	<key>StartInterval</key>
+	<integer>30</integer>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>/dev/null</string>
+</dict>
+</plist>

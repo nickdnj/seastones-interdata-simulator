@@ -1,0 +1,25 @@
+{
+  "schema": "seastones.patch/1",
+  "slug": "sample-drone",
+  "map": "all-da-4",
+  "auth": "authentic",
+  "templates": {
+    "voice": {
+      "modules": [
+        { "id": "osc", "type": "vco" },
+        { "id": "eg", "type": "env" },
+        { "id": "amp", "type": "vca" }
+      ],
+      "cables": [
+        ["$pitch", "osc.pitch"],
+        ["$gate", "eg.gate"],
+        ["osc.saw", "amp.in"],
+        ["eg.out", "amp.cv"],
+        ["amp.out", "$out"]
+      ]
+    }
+  },
+  "voices": { "template": "voice", "count": 4, "pitch": "dac.{i}", "gate": "dac.{i+4}", "out": "mix.in{i+1}" },
+  "modules": [{ "id": "mix", "type": "mixer" }],
+  "cables": [["mix.out", "out.l"]]
+}

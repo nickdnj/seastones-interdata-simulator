@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The nightly clean restart on macOS (template; see deploy/reset.sh). install-station.sh
+     rewrites Hour and Minute from RESET_TIME in deploy/station.conf. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.reset</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>@DEST@/deploy/reset.sh</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>SX_DEST</key>
+		<string>@DEST@</string>
+		<key>SX_DATA</key>
+		<string>@DATA@</string>
+	</dict>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>3</integer>
+		<key>Minute</key>
+		<integer>30</integer>
+	</dict>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>@DATA@/log/reset.log</string>
+	<key>StandardErrorPath</key>
+	<string>@DATA@/log/reset.log</string>
+</dict>
+</plist>

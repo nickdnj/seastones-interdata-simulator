@@ -1,0 +1,149 @@
+# seastones.cycles/1: Interdata 7/16 instruction execution times (SP-S4B, MACH-5)
+#
+# STATUS: ESTIMATE
+#
+# This is NOT a 7/16 timing table. No per-instruction table for the 7/16 itself could be read
+# (docs/research/bitsavers-716-report.md). The values are the Interdata Model 74 times from
+#   Interdata "New Series Models 74/70/80 User's Manual", publication 29-261R01 (Feb 1973),
+#   Appendix 5 "Instruction Execution Times", printed pp. A5-1 to A5-2 (Model 74),
+#   with class times from Table 1-1 of the same manual,
+#   http://www.bitsavers.org/pdf/interdata/16bit/29-261R01_UsersManual_Feb73.pdf
+# used as a PROXY for the 7/16. Why the Model 74: its Table 1-1 class times (RR 1.5 us, RX 3.25 us,
+# 1.0 us core) equal the only two 7/16 values read from the 7/16 Brochure (1973), LHR 1.5 us and
+# LH 3.25 us, and both machines use 1.0 us core. The Model 70 is faster (RR 1.0 us).
+#
+# Every value was read from archive.org OCR text of the scan, not from the page image, and the
+# OCR loses column alignment in parts of the table. Nick must check pp. A5-1 to A5-2 by eye
+# before MACH-5 cites any value (SP-S4A sign-off). Until then the staff and About pages say
+# "estimate" (QA CNF-08, CT-02).
+#
+# Columns (tab separated):
+#   mnemonic  SIMH mnemonic (Interdata/id16_sys.c at the pin)
+#   op        primary opcode byte, hex (Interdata/id16_cpu.c decrom[] index)
+#   form      RR, SF (short form), RS, RX
+#   base_ns   execution time in ns, no-branch case for branches, memory operand not indexed
+#   per_n_ns  extra ns per unit of n (shift count, registers moved, bytes) or 0
+#   taken_ns  time when the branch is taken, or 0 if not a branch
+#   conf      read     = a legible row of the Model 74 table (or the 7/16 brochure)
+#             unclear  = a value from the Model 74 table whose column could not be told apart
+#             class    = the Model 74 Table 1-1 class time for that form (no per-row value read)
+#             estimate = derived or borrowed (Model 70, or by rule), see note
+#   source    document and pages
+#   note      free text
+# Indexing (RX with an index register) adds time on the Model 74; it is not modelled.
+# Rows: all 113 instructions SIMH accepts on the 716 class (61 base, AL LM STM, 36 Model 5 group,
+# 13 single-precision floating point). 8/16 and 8/16E opcodes are excluded.
+mnemonic	op	form	base_ns	per_n_ns	taken_ns	conf	source	note
+BALR	01	RR	2000	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row BAL 2.00
+BTCR	02	RR	2000	0	2250	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row BTC 2.00/2.25, column unclear; read as no-branch/branch
+BFCR	03	RR	2000	0	2250	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row BFC 2.25/2.00, column unclear; set equal to BTCR
+NHR	04	RR	1500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row NH, RR column
+CLHR	05	RR	1500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row CLH, RR column
+OHR	06	RR	1500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row OH, RR column
+XHR	07	RR	1500	0	0	class	29-261R01 Table 1-1 Model 74 class time	A5 OCR gave XH 2.50 with the column unclear; RR class time used
+LHR	08	RR	1500	0	0	read	7/16 Brochure 1973 specifications; 29-261R01 App.5 Model 74 pp.A5-1..A5-2	7/16-native value (brochure) equals the Model 74 RR time
+CHR	09	RR	1500	0	0	class	29-261R01 Table 1-1 Model 74 class time	A5 row CH 2.25/2.50, column unclear
+AHR	0A	RR	1500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row AH, RR column
+SHR	0B	RR	1500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row SH, RR column
+MHR	0C	RR	43500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row MH best/avg/worst 36.50/43.50/50.50; average used
+DHR	0D	RR	54250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row DH 54.25/54.25/56.50
+ACHR	0E	RR	1750	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row ACH
+SCHR	0F	RR	1750	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row SCH
+BTBS	20	SF	2000	0	4000	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	no-branch/branch
+BTFS	21	SF	2000	0	3750	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	no-branch/branch
+BFBS	22	SF	2250	0	3750	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	no-branch/branch
+BFFS	23	SF	2250	0	3500	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	no-branch/branch
+LIS	24	SF	2250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+LCS	25	SF	2250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+AIS	26	SF	2250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+SIS	27	SF	2250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+LER	28	RR	4000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+CER	29	RR	8000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+AER	2A	RR	26000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+SER	2B	RR	26000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+MER	2C	RR	74000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+DER	2D	RR	108000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+STH	40	RX	3750	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row STH 3.75, column unclear
+BAL	41	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+BTC	42	RX	3250	0	3500	estimate	29-261R01 Table 1-1 Model 74 class time	RX class; taken branch assumed +0.25 as in BTCR
+BFC	43	RX	3250	0	3500	estimate	29-261R01 Table 1-1 Model 74 class time	RX class; taken branch assumed +0.25 as in BTCR
+NH	44	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+CLH	45	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+OH	46	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+XH	47	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+LH	48	RX	3250	0	0	read	7/16 Brochure 1973 specifications; 29-261R01 Table 1-1 Model 74 class time	7/16-native value (brochure) equals the Model 74 RX class time
+CH	49	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+AH	4A	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+SH	4B	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+MH	4C	RX	45250	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	MHR average plus the RX-RR difference (1.75)
+DH	4D	RX	56000	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	DHR plus 1.75
+ACH	4E	RX	3500	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	ACHR plus 1.75
+SCH	4F	RX	3500	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	SCHR plus 1.75
+STE	60	RX	5000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+AHM	61	RX	4750	0	0	estimate	29-261R01 Table 1-1 Model 74 class time	A5 cell blank in OCR; RX class plus 1.5 for the memory write
+ATL	64	RX	8000	0	0	estimate	none	not on Model 74; no time found; placeholder
+ABL	65	RX	8000	0	0	estimate	none	not on Model 74; no time found; placeholder
+RTL	66	RX	8000	0	0	estimate	none	not on Model 74; no time found; placeholder
+RBL	67	RX	8000	0	0	estimate	none	not on Model 74; no time found; placeholder
+LE	68	RX	5000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+CE	69	RX	10000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+AE	6A	RX	27600	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+SE	6B	RX	27600	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+ME	6C	RX	75900	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+DE	6D	RX	110600	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	not on Model 74; 7/16 microcoded FP time unknown; Model 70 range midpoint where read, else a guess
+SRLS	90	SF	3250	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SLLS	91	SF	3250	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+STBR	92	RR	2750	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row STB 2.75, column unclear
+LBR	93	RR	2250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row LB 2.25, column unclear
+EXBR	94	RR	2000	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row EXBR
+EPSR	95	RR	4000	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row EPSR
+WBR	96	RR	6250	2750	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row WB garbled in OCR; n = bytes; App.1 marks block I/O Models 70/80 only
+RBR	97	RR	5750	3500	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row RB garbled in OCR; n = bytes; App.1 marks block I/O Models 70/80 only
+WHR	98	RR	3750	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row WH 5.00/3.75; 3.75 read as the RR form
+RHR	99	RR	3250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row RH 4.25/3.25; 3.25 read as the RR form
+WDR	9A	RR	3500	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row WD 3.50 used for both forms (conservative)
+RDR	9B	RR	3250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row RD 3.25 used for both forms (conservative)
+MHUR	9C	RR	40750	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row MHU 33.75/40.75/47.75; average used
+SSR	9D	RR	3500	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row SS 3.50 used for both forms (conservative)
+OCR	9E	RR	3500	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row OC 3.50 used for both forms (conservative)
+AIR	9F	RR	4250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row AI 4.25 used for both forms (conservative)
+BXH	C0	RX	5000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	Model 74 cell unreadable; Model 70 RS 5.0 used
+BXLE	C1	RX	5000	0	0	estimate	29-261R01 App.5 Model 70 pp.A5-3..A5-4	Model 74 cell unreadable; Model 70 RS 5.0 used
+LPSW	C2	RX	5000	0	0	estimate	29-261R01 Table 1-1 Model 74 class time	no readable row
+THI	C3	RS	2500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+NHI	C4	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+CLHI	C5	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+OHI	C6	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+XHI	C7	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+LHI	C8	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+CHI	C9	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+AHI	CA	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+SHI	CB	RS	2500	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+SRHL	CC	RS	4250	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SLHL	CD	RS	4250	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SRHA	CE	RS	4250	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SLHA	CF	RS	6000	1000	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+STM	D0	RX	5000	1250	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = registers stored
+LM	D1	RX	5000	1250	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 cell blank in OCR; STM time used; n = registers loaded
+STB	D2	RX	3500	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	STBR plus 0.75
+LB	D3	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+CLB	D4	RX	3250	0	0	class	29-261R01 Table 1-1 Model 74 class time	
+AL	D5	RX	3250	0	0	estimate	29-261R01 Table 1-1 Model 74 class time	Autoload runs a device load loop; not modelled; the rig program never uses it
+WB	D6	RX	6250	2750	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row WB garbled in OCR; n = bytes
+RB	D7	RX	5750	3500	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row RB garbled in OCR; n = bytes
+WH	D8	RX	5000	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row WH 5.00/3.75; 5.00 read as the RX form
+RH	D9	RX	4250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	A5 row RH 4.25/3.25; 4.25 read as the RX form
+WD	DA	RX	3500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+RD	DB	RX	3250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+MHU	DC	RX	42500	0	0	estimate	29-261R01 App.5 Model 74 pp.A5-1..A5-2	MHUR average plus 1.75
+SS	DD	RX	3500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+OC	DE	RX	3500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+AI	DF	RX	4250	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+SVC	E1	RX	10500	0	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+SINT	E2	RS	8250	0	0	unclear	29-261R01 App.5 Model 74 pp.A5-1..A5-2	
+RRL	EA	RS	5000	1500	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+RLL	EB	RS	5000	1500	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SRL	EC	RS	6750	1500	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SLL	ED	RS	6000	1500	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SRA	EE	RS	6750	1750	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count
+SLA	EF	RS	6000	1500	0	read	29-261R01 App.5 Model 74 pp.A5-1..A5-2	n = shift count

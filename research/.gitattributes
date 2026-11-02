@@ -1,0 +1,6 @@
+# Notebooks are committed with outputs stripped (RE-6, RSC-03).
+# Activate the filter once per clone (needs nbstripout in the research venv):
+#   nbstripout --install
+# This file only names the filter; an inactive filter is ignored by git.
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb

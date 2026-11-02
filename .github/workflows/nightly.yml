@@ -1,0 +1,65 @@
+# Nightly, hardware-runner and release stages (DEV-PLAN 7.4, QA-STRATEGY 12.1).
+#
+# Every step is a `make` target.
+#
+# The hardware runner is a self-hosted runner on the bench, reachable only from
+# the private repo. It is described here and NOT installed: the bench does not
+# exist yet (SP-BUY). Its job only runs when dispatched by hand.
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      hardware:
+        description: "Also run the hardware-runner job (needs the bench)"
+        type: boolean
+        default: false
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  nightly:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/seastones
+          key: oracle-${{ runner.os }}-${{ hashFiles('deploy/simh.pin') }}
+      - run: make oracle
+      - run: make conformance-nightly
+      - run: make private-check-history
+
+  hardware:
+    if: github.event_name == 'workflow_dispatch' && inputs.hardware
+    runs-on: [self-hosted, seastones-bench]
+    steps:
+      - uses: actions/checkout@v4
+      - run: make hardware-acceptance
+
+  release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make ci-deps
+      - run: make release-check

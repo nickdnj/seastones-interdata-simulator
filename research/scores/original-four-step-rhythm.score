@@ -1,0 +1,25 @@
+# Original pattern written for the rig's tests and as a format example (SEA-4: our own).
+score: 1
+title: Four step rhythm
+status: ready
+origin: original
+kind: pattern
+tick: 10ms
+voices: 2
+technique: a four-step sequence on two voices with a sample-and-hold style CV jump every bar
+
+@0     note  v0  A2
+@0     cv    d8  0x4000
+@25    trig  g8
+@50    off   v0
+@50    note  v1  E3
+@75    trig  g8
+@100   off   v1
+@100   note  v0  D3
+@100   cv    d8  6.40V
+@125   trig  g8
+@150   off   v0
+@150   note  v1  G2
+@175   trig  g8
+@200   off   v1
+@200   loop  @0

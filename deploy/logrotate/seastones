@@ -1,0 +1,20 @@
+# /data/log rotation on Linux: 5 files of 2 MB each, per log (ported from the Model 4 kiosk).
+# Installed as /etc/logrotate.d/seastones by scripts/install-station.sh, which rewrites `size`
+# and `rotate` from deploy/station.conf. rigd and the page server log to journald (in memory,
+# capped in /etc/systemd/journald.conf.d/10-seastones.conf); these are the files the staff
+# read across a reboot: the browser loop's kiosk.log, the watchdog's lines, boot.jsonl.
+#
+# copytruncate: the browser loop holds kiosk.log open and has no reopen signal. It can lose a
+# few bytes written during the copy, the right trade for a log nobody parses by machine.
+
+/data/log/*.log /data/log/*.jsonl {
+    su seastones seastones
+    size 2048k
+    rotate 5
+    missingok
+    notifempty
+    copytruncate
+    compress
+    delaycompress
+    nomail
+}

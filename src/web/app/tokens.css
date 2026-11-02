@@ -1,0 +1,78 @@
+/* tokens.css: every colour, type role and motion token, in one file (DESIGN-SYSTEM 2, 3, 6).
+ * A retheme is a change to this file only. Contrast figures are in DESIGN-SYSTEM 2.1. */
+
+@font-face { font-family: "Roboto Slab"; src: url("../assets/fonts/roboto-slab-800.woff2") format("woff2");
+             font-weight: 800; font-style: normal; font-display: block; }
+@font-face { font-family: "Oswald"; src: url("../assets/fonts/oswald.woff2") format("woff2");
+             font-weight: 200 700; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Sans"; src: url("../assets/fonts/ibm-plex-sans.woff2") format("woff2");
+             font-weight: 100 700; font-style: normal; font-display: block; }
+@font-face { font-family: "JetBrains Mono"; src: url("../assets/fonts/jetbrains-mono.woff2") format("woff2");
+             font-weight: 100 800; font-style: normal; font-display: block; }
+
+:root {
+  /* night: the stage and its surfaces */
+  --night: #100C16;
+  --night-2: #1C1424;
+  --dusk: #2B1B33;
+  --dusk-2: #3A2442;
+  --well: #120D18;
+  --edge: #3F3050;
+  --edge-2: #4A3A58;
+
+  /* text */
+  --cream: #F6EBD0;
+  --muted: #B9AEC6;
+
+  /* meaning (DESIGN-SYSTEM 2.2): amber = the computer, teal = a signal in the synth,
+     rose = gates, violet = tone, red-deep = leave (HOME) */
+  --amber: #F2A83B;
+  --amber-hot: #FFE2A0;
+  --amber-core: #FFFBE8;
+  --ember: #E4572E;
+  --rose: #F07FA3;
+  --violet: #7B5BB0;
+  --violet-cable: #9B7FD0;
+  --teal: #4FC3B5;
+  --scope: #7CFFC4;
+  --red: #B83A24;
+  --red-deep: #8E2716;
+
+  /* the 7/16 panel */
+  --panel-face: #E4DCCB;
+  --panel-edge: #CFC5B0;
+  --ink: #1C1A17;
+  --ink-muted: #3E3A32;
+  --lamp-off: #3A352D;
+
+  /* the synthesizer */
+  --brushed: #23262B;
+  --brushed-2: #30343A;
+  --silver: #D5D8DC;
+  --silver-dim: #B5BAC1;
+
+  /* type roles */
+  --f-display: "Roboto Slab", Rockwell, Georgia, serif;
+  --f-label: "Oswald", "Arial Narrow", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* type scale on the 1920 x 1080 stage (DESIGN-SYSTEM 3.1). Nothing below --t-legend. */
+  --t-poster: 212px;
+  --t-display-xl: 92px;
+  --t-display-l: 76px;
+  --t-display-m: 52px;
+  --t-body: 32px;
+  --t-ui: 28px;
+  --t-caption: 25px;
+  --t-legend: 22px;
+
+  /* motion (DESIGN-SYSTEM 6) */
+  --t-press: 120ms;
+  --t-snap: 300ms;
+  --ease-snap: cubic-bezier(.3, 1.4, .5, 1);
+  --t-layer: 280ms;
+  --t-scroll: 250ms;
+  --t-fade: 400ms;
+  --t-sweep: 3.2s;
+}

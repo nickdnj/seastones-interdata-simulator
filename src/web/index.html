@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>The 1974 Seastones Rig</title>
+<link rel="stylesheet" href="app/tokens.css">
+<link rel="stylesheet" href="app/style.css">
+</head>
+<body>
+<!--
+  The page makes no sound and invents nothing: every lamp, meter, key and line it draws
+  is the emulated machine's state from rigd (ARCHITECTURE 4.4, 4.7). The frame (header,
+  dock, footer) is rendered by the shell, outside every layer, so no layer can omit the
+  disclosure footer (STORY-3).
+-->
+<div id="stage" class="attract">
+  <svg class="bg" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0912"/><stop offset=".55" stop-color="#1a1124"/><stop offset=".85" stop-color="#3a1f38"/><stop offset="1" stop-color="#5a2a3a"/></linearGradient>
+      <radialGradient id="glow" cx=".5" cy="1.05" r=".7"><stop offset="0" stop-color="#F2A83B" stop-opacity=".30"/><stop offset=".5" stop-color="#E4572E" stop-opacity=".10"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+      <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 .9  0 0 0 0 .8  0 0 0 .5 0"/></filter>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/>
+    <rect width="1920" height="1080" fill="url(#glow)"/>
+    <g id="contours" fill="none" stroke-width="2"></g>
+    <rect width="1920" height="1080" filter="url(#grain)" opacity=".05"/>
+  </svg>
+
+  <header class="top" id="header"></header>
+  <main class="main" id="main">
+    <section class="layer attract" id="layer-attract" data-layer="attract" aria-label="Start"></section>
+    <section class="layer" id="layer-play" data-layer="play" aria-label="Play"></section>
+    <section class="layer" id="layer-computer" data-layer="computer" aria-label="The Computer"></section>
+    <section class="layer" id="layer-code" data-layer="code" aria-label="The Code"></section>
+    <section class="layer" id="layer-patch" data-layer="patch" aria-label="Patch"></section>
+    <section class="layer" id="layer-story" data-layer="story" aria-label="The Story"></section>
+  </main>
+  <nav class="dock" id="dock" aria-label="Layers"></nav>
+  <div class="veil" id="veil" hidden role="dialog" aria-modal="false"></div>
+  <div class="fault" id="fault" hidden role="alert"></div>
+  <footer class="foot" id="footer"></footer>
+  <div class="toast" id="toast" aria-hidden="true"></div>
+  <div class="sr-only" id="live-polite" aria-live="polite"></div>
+  <div class="sr-only" id="live-assertive" aria-live="assertive"></div>
+</div>
+<script type="module" src="app/app.js"></script>
+</body>
+</html>

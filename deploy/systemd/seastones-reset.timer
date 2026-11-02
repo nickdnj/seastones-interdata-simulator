@@ -1,0 +1,16 @@
+[Unit]
+# 03:30 is a decision, not a measurement (the museum's hours are not confirmed).
+# scripts/install-station.sh rewrites OnCalendar and RandomizedDelaySec from deploy/station.conf.
+Description=The 1974 Seastones Rig: nightly clean restart at 03:30
+PartOf=seastones-station.target
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=300
+# Switched off overnight: do not restart the moment it is switched on in the morning.
+Persistent=false
+AccuracySec=1min
+Unit=seastones-reset.service
+
+[Install]
+WantedBy=timers.target

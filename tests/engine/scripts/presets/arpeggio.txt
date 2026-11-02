@@ -1,0 +1,6 @@
+# arpeggio: Hold C3 E3 G3 C4: the computer plays them up and down; then D3 F3 A3 D4.
+# seconds 13
+0.00 keys 0
+0.20 keys 1091
+4.00 keys 4224
+8.00 keys 0

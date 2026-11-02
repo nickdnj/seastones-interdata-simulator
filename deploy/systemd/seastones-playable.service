@@ -1,0 +1,24 @@
+[Unit]
+# Boot to playable (NFR-3, SYS-01: at most 90 s, target 60 s). Once per boot it waits until the
+# page and the engine are both up and appends the time since boot to /data/log/boot.jsonl, so
+# every boot's number is on record without a stopwatch. It fails (systemctl --failed shows it)
+# when the station was not playable within the budget.
+Description=The 1974 Seastones Rig: record the time from boot to playable
+Documentation=file:/opt/seastones/docs/OPERATIONS.md
+After=seastones-rigd.service seastones-web.service
+PartOf=seastones-station.target
+
+[Service]
+Type=oneshot
+User=seastones
+Group=seastones
+ExecStart=/usr/bin/python3 /opt/seastones/deploy/playable.py --check all --timeout 120 --budget 90 --boot --log /data/log/boot.jsonl
+TimeoutStartSec=150
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=-/data/log
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressAllow=localhost
+IPAddressDeny=any

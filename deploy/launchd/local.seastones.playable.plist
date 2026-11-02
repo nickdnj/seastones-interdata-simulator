@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Boot to playable on macOS, once per login (template; see deploy/playable.py): appends the
+     time since boot to boot.jsonl when the page and the engine are both up. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.seastones.playable</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PYTHON@</string>
+		<string>@DEST@/deploy/playable.py</string>
+		<string>--check</string>
+		<string>all</string>
+		<string>--timeout</string>
+		<string>120</string>
+		<string>--budget</string>
+		<string>@BOOT_BUDGET_S@</string>
+		<string>--boot</string>
+		<string>--log</string>
+		<string>@DATA@/log/boot.jsonl</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>/dev/null</string>
+</dict>
+</plist>

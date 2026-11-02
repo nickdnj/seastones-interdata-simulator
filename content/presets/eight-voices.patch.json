@@ -1,0 +1,113 @@
+{
+  "schema": "seastones.patch/1",
+  "slug": "eight-voices",
+  "map": "latch-8",
+  "auth": "authentic",
+  "program": {
+    "routine": "play"
+  },
+  "templates": {
+    "voice": {
+      "modules": [
+        {
+          "id": "osc",
+          "type": "vco"
+        },
+        {
+          "id": "flt",
+          "type": "vcf",
+          "params": {
+            "cutoff": 7.5,
+            "res": 0.2
+          }
+        },
+        {
+          "id": "eg",
+          "type": "env",
+          "params": {
+            "attack": 0.005,
+            "decay": 0.3,
+            "sustain": 0.7,
+            "release": 0.4
+          }
+        },
+        {
+          "id": "amp",
+          "type": "vca"
+        }
+      ],
+      "cables": [
+        [
+          "$pitch",
+          "osc.pitch"
+        ],
+        [
+          "$gate",
+          "eg.gate"
+        ],
+        [
+          "osc.saw",
+          "flt.in"
+        ],
+        [
+          "flt.lp",
+          "amp.in"
+        ],
+        [
+          "eg.out",
+          "amp.cv"
+        ],
+        [
+          "amp.out",
+          "$out"
+        ]
+      ]
+    }
+  },
+  "voices": {
+    "template": "voice",
+    "count": 8,
+    "pitch": "dac.{i}",
+    "gate": "gate.{i}",
+    "out": "mix{i/4}.in{i%4+1}"
+  },
+  "modules": [
+    {
+      "id": "mix0",
+      "type": "mixer",
+      "params": {
+        "l1": 0.25,
+        "l2": 0.25,
+        "l3": 0.25,
+        "l4": 0.25
+      }
+    },
+    {
+      "id": "mix1",
+      "type": "mixer",
+      "params": {
+        "l1": 0.25,
+        "l2": 0.25,
+        "l3": 0.25,
+        "l4": 0.25
+      }
+    },
+    {
+      "id": "out",
+      "type": "out",
+      "params": {
+        "level": 0.85
+      }
+    }
+  ],
+  "cables": [
+    [
+      "mix0.out",
+      "out.l"
+    ],
+    [
+      "mix1.out",
+      "out.r"
+    ]
+  ]
+}

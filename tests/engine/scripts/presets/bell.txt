@@ -1,0 +1,13 @@
+# bell: Single strikes C4 E4 G4 C5, then a chord C4 G4 E5 left to ring out.
+# seconds 9
+0.00 keys 0
+0.20 keys 1000
+0.50 keys 0
+1.00 keys 10000
+1.30 keys 0
+1.80 keys 80000
+2.10 keys 0
+2.60 keys 1000000
+2.90 keys 0
+4.00 keys 10081000
+4.20 keys 0

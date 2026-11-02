@@ -1,0 +1,3 @@
+# S-3 lockstep regression seeds (CNF-02). A seed that ever fails is appended here by
+# tests/conformance/test_lockstep.py and replays on every run from then on.
+# One integer per line; anything after '#' is a comment.

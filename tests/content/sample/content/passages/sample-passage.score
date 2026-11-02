@@ -1,0 +1,11 @@
+score: 1
+title: Sample passage
+status: draft-hidden
+origin: synthetic
+kind: passage
+tick: 10ms
+voices: 1
+
+@0 note v0 C3
+@50 off v0
+@100 end

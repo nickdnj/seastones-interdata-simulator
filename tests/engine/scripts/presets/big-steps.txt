@@ -1,0 +1,5 @@
+# big-steps: Hold C3 and G3: the computer jumps the tone in big steps every quarter second.
+# seconds 14
+0.00 keys 0
+0.20 keys 81
+9.00 keys 0

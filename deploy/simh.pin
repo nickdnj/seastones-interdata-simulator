@@ -1,0 +1,66 @@
+# open-simh pin — the one simulator this exhibit is tested against.
+#
+# Seastones Rig (SP-01): copied from the Model 4 kiosk's deploy/simh.pin
+# unchanged in its keys. Here the pin names (a) the tag whose CPU files are
+# vendored into src/engine/simh/ and (b) the stock `id16` built by
+# scripts/build-oracle.sh as the conformance oracle (ADR-001). The comments
+# below are the Model 4 kiosk's and still hold: same tag, same banner.
+#
+# ARCHITECTURE.md A-20: there is no mock `id16` anywhere in this tree, so the
+# bridge tests *are* tests of a particular simulator build. NFR-12/PL-6: which
+# build must therefore be written down, not inherited from whatever a package
+# manager happens to ship this month.
+#
+# `key = value`, `#` comments. Read by scripts/build-simh.sh and by the CI
+# cache key. Keep it parseable by `grep`/`cut` — it is read from shell.
+
+# --- the pin ----------------------------------------------------------------
+
+repo   = https://github.com/open-simh/simh
+commit = c0f0a8877e222ed85c0bbafe83b42816402f7428
+ref    = refs/tags/v3.12-3
+target = id16
+
+# Build flags. `make id16` on this tree needs nothing but a C compiler:
+#   * VIDEO_USEFUL and NETWORK_USEFUL are set from ${MAKECMDGOALS}, and `id16`
+#     matches neither list, so SDL2 and libpcap are never even looked for —
+#     and on a SIM_MAJOR=3 tree video support does not exist at all;
+#   * NOVIDEO/NONETWORK are belt and braces, so a future makefile that widens
+#     those lists cannot silently start wanting libraries the runner lacks;
+#   * TESTS=0 suppresses the post-link `RegisterSanityCheck` run. CI builds a
+#     simulator; running one is the bridge job's business, not the build's.
+flags  = NOVIDEO=1 NONETWORK=1 TESTS=0
+deps   = build-essential git
+
+# --- two versions, and which one is which -----------------------------------
+#
+# `sim_rev.h` at this commit is SIM_MAJOR 3 / SIM_MINOR 12 / SIM_PATCH 3, so a
+# simulator built from this pin prints:
+#
+#     Interdata 16b simulator V3.12-3
+#
+# which is byte-for-byte the banner on Nick's Mac, where `id16` comes from
+# `brew install open-simh`. Homebrew's open-simh formula builds
+# `archive/refs/tags/v3.12-3.tar.gz` — the same tag, the same source. The Mac
+# and CI therefore run the same simulator, which is the only reason a bridge
+# test that passes in one place means anything in the other.
+#
+# **Upstream HEAD is not this.** `git ls-remote https://github.com/open-simh/simh HEAD`
+# on 2026-09-18 returned a1f57fa3738ed31148d31126ba1a7278ff845c6d, whose
+# `sim_rev.h` is SIM_MAJOR 4 / SIM_MINOR 1 — the V4.x line, a different SCP with
+# a different console implementation. Pinning HEAD was considered and rejected:
+# every `[measured]` claim in this repo (the X'0068' loader disassembly, the
+# `set console telnet=` behaviour recorded on #56, the tick calibration) was
+# measured on 3.12-3, and a pin whose job is reproducibility should not point at
+# a moving branch that no one here has ever run. Both facts are recorded so the
+# next person does not have to re-derive either.
+#
+# Upgrading is a deliberate piece of work, not a bump: change `commit` here,
+# re-run tests/bridge in full, and expect #56's `test_console_port_is_not_on_the
+# _network` to stop skipping and start enforcing, because V4.x accepts a host in
+# `set console telnet=`. That is the day the kiosk's console stops being on the
+# LAN — worth doing, on purpose, with the suite watching.
+
+upstream_head_at_pin_time = a1f57fa3738ed31148d31126ba1a7278ff845c6d
+upstream_head_checked     = 2026-09-18
+banner                    = Interdata 16b simulator V3.12-3

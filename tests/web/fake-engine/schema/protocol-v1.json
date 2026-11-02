@@ -1,0 +1,394 @@
+{
+  "$comment": "Protocol v1 between rigd and the page (ARCHITECTURE 4.4, 4.6). PROPOSED: written by the UI lane for the fake engine (VS-28) because src/rigd/schema/ does not exist yet (VS-14). When rigd lands, move this file to src/rigd/schema/ unchanged and point the fake engine at it, so both are validated by the same file. Fields marked 'extension' in their description are additions to ARCHITECTURE 4.4/4.6 that the UI needs; raise them with the architecture owner.",
+  "id": "seastones.protocol/1",
+  "definitions": {
+    "u16": { "type": "integer", "minimum": 0, "maximum": 65535 },
+    "u8": { "type": "integer", "minimum": 0, "maximum": 255 },
+    "frac": { "type": "number", "minimum": 0, "maximum": 1 },
+    "hex64": { "type": "string", "pattern": "^[0-9A-F]{16}$" },
+    "jack": { "type": "string", "pattern": "^[a-z0-9_]+(-[a-z0-9_]+)*\\.[a-z0-9_]+(-[a-z0-9_]+)*$" },
+    "modId": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,15}$" },
+    "portName": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "cable": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": { "from": { "$ref": "jack" }, "to": { "$ref": "jack" } }
+    },
+    "speedId": { "type": "string", "enum": ["run", "div30", "div300", "div3000", "crawl", "step"] },
+    "faultCode": {
+      "type": "string",
+      "enum": [
+        "program_stalled", "dsp_fault", "audio_device_missing", "audio_stalled", "midi_absent",
+        "image_missing", "image_hash_mismatch", "config_invalid", "engine_load_failed",
+        "ui_absent_muted", "audio_underruns"
+      ]
+    },
+    "id": { "type": "integer", "minimum": 1 },
+    "hhmm": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+    "dba": { "type": "integer", "minimum": 40, "maximum": 85 }
+  },
+  "server": {
+    "hello": {
+      "type": "object",
+      "required": ["v", "t", "engine_build", "image_sha256", "listing_id", "capabilities", "disasm"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "hello" },
+        "engine_build": { "type": "string" },
+        "image_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "listing_id": { "type": "string", "description": "the image_sha256 the listing (rig.lst.json) was assembled for" },
+        "capabilities": {
+          "type": "object",
+          "required": ["speeds", "voices", "dac", "channel_map", "jacks"],
+          "additionalProperties": false,
+          "properties": {
+            "speeds": {
+              "type": "array", "minItems": 6, "maxItems": 6,
+              "description": "extension: the calibration record (PR-03) as the engine has it; ratios are never hard-coded in the page (UI-14)",
+              "items": {
+                "type": "object",
+                "required": ["id", "label", "ratio", "key_to_sound_ms", "calibrated"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "$ref": "speedId" },
+                  "label": { "type": "string" },
+                  "ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "key_to_sound_ms": { "type": ["number", "null"] },
+                  "calibrated": { "type": "boolean" }
+                }
+              }
+            },
+            "voices": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "dac": {
+              "type": "object", "required": ["word_bits", "range_v"], "additionalProperties": false,
+              "properties": { "word_bits": { "type": "integer", "minimum": 1, "maximum": 16 }, "range_v": { "type": "number" } }
+            },
+            "channel_map": { "type": "string" },
+            "jacks": { "type": "array", "items": { "$ref": "jack" }, "description": "extension: every jack the patch graph accepts" }
+          }
+        },
+        "disasm": {
+          "type": "object",
+          "description": "extension: sx_disasm (SIMH fprint_sym) text for every listed instruction address, hex key",
+          "patternProperties": { "^[0-9A-F]{4}$": { "type": "string" } },
+          "additionalProperties": false
+        },
+        "patch": { "$ref": "server:patch" }
+      }
+    },
+    "state": {
+      "type": "object",
+      "required": [
+        "v", "t", "seq", "frames", "cycles", "pc", "psw", "r", "cc", "dr", "sr", "keys_raw",
+        "keys_seen", "dac", "gates", "watch", "pc_hist", "lamps", "speed", "halted", "waiting",
+        "muted", "faults", "scan_hz"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "state" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "frames": { "type": "integer", "minimum": 0 },
+        "cycles": { "type": "integer", "minimum": 0 },
+        "pc": { "$ref": "u16" }, "psw": { "$ref": "u16" },
+        "r": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "$ref": "u16" } },
+        "cc": { "type": "integer", "minimum": 0, "maximum": 15 },
+        "dr": { "$ref": "u16" }, "sr": { "$ref": "u16" },
+        "keys_raw": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "u8" }, "description": "staff diagnostics and the idle timer only; never drawn for visitors" },
+        "keys_seen": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "u8" } },
+        "dac": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "$ref": "u16" } },
+        "gates": { "$ref": "u16" },
+        "watch": {
+          "type": "object", "required": ["voices"], "additionalProperties": false,
+          "properties": {
+            "voices": {
+              "type": "array", "minItems": 1, "maxItems": 8,
+              "items": { "type": ["integer", "null"], "minimum": 0, "maximum": 127 },
+              "description": "the note each voice holds (MIDI numbering), null when free; read from the program's own memory or registers by the panel model"
+            }
+          }
+        },
+        "pc_hist": {
+          "type": "object",
+          "description": "fraction of instructions per listing address over the last 250 ms",
+          "patternProperties": { "^[0-9A-F]{4}$": { "$ref": "frac" } },
+          "additionalProperties": false
+        },
+        "lamps": {
+          "type": "object",
+          "required": ["addr", "data", "exact"],
+          "additionalProperties": false,
+          "description": "extension (UX 6.3, PR-01): per lamp, the fraction of instructions this frame during which the bit was set; index 0 is bit 0 (the MSB). exact is true in CRAWL, STEP and when halted",
+          "properties": {
+            "addr": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "$ref": "frac" } },
+            "data": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "$ref": "frac" } },
+            "exact": { "type": "boolean" }
+          }
+        },
+        "speed": { "$ref": "speedId" },
+        "halted": { "type": "boolean" }, "waiting": { "type": "boolean" }, "muted": { "type": "boolean" },
+        "faults": { "type": "array", "items": { "$ref": "faultCode" } },
+        "scan_hz": { "type": "number", "minimum": 0, "description": "extension: laps of the scan loop per second, measured by the engine (header SCAN readout)" },
+        "volume": {
+          "type": "object", "required": ["db", "muted"], "additionalProperties": false,
+          "description": "extension (AUDIO-3, KP-06), host lane: the visitor volume (dB below the staff ceiling, never above it) and the visitor's own mute; HOME restores 0 dB and unmuted",
+          "properties": { "db": { "type": "number", "minimum": -40, "maximum": 0 }, "muted": { "type": "boolean" } }
+        }
+      }
+    },
+    "scope": {
+      "type": "object", "required": ["v", "t", "seq", "points"], "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "scope" }, "seq": { "type": "integer", "minimum": 0 },
+        "points": { "type": "array", "minItems": 512, "maxItems": 512, "items": { "type": "number", "minimum": -1, "maximum": 1 } }
+      }
+    },
+    "heartbeat": {
+      "type": "object",
+      "required": ["v", "t", "engine_alive", "audio_ok", "midi_present", "faults", "muted", "lat_p95", "stages"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "heartbeat" },
+        "engine_alive": { "type": "boolean" }, "audio_ok": { "type": "boolean" },
+        "midi_present": { "type": "boolean" },
+        "faults": { "type": "array", "items": { "$ref": "faultCode" } },
+        "muted": { "type": "boolean" },
+        "lat_p95": { "type": ["number", "null"] },
+        "underruns": { "type": "integer", "minimum": 0, "description": "extension (KIOSK-5, NFR-6; QA-ADV-06), host lane: late audio callbacks (the host's underrun proxy: an interval over 1.5 periods) on a real device since rigd started. A storm (3 within 5 s) is the audio_underruns fault, cleared after 10 s without one" },
+        "stages": {
+          "type": "object",
+          "description": "extension (UX 5.8): which of the four recovery stages are really up",
+          "required": ["computer", "program", "synth", "output"], "additionalProperties": false,
+          "properties": {
+            "computer": { "type": "boolean" }, "program": { "type": "boolean" },
+            "synth": { "type": "boolean" }, "output": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "fault": {
+      "type": "object", "required": ["v", "t", "code", "staff_line", "since"], "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "fault" }, "code": { "$ref": "faultCode" },
+        "staff_line": { "type": "string" }, "since": { "type": "integer", "minimum": 0 },
+        "cleared": { "type": "boolean" }
+      }
+    },
+    "patch": {
+      "type": "object", "required": ["v", "t", "cables", "reaches_out", "preset", "layout"], "additionalProperties": false,
+      "description": "extension (PM-13, PM-14): the live patch, sent at connect and after every change. Cables are in wall jack ids; layout says which plates the wall has, derived from the engine-format patch (src/web/app/wallmodel.js names the engine port for each jack)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "patch" },
+        "cables": { "type": "array", "maxItems": 96, "items": { "$ref": "cable" } },
+        "reaches_out": { "type": "boolean" },
+        "preset": { "type": ["string", "null"] },
+        "layout": {
+          "type": "object", "required": ["map", "rail", "voices", "modules"], "additionalProperties": false,
+          "properties": {
+            "map": { "type": "string" },
+            "rail": { "type": "object", "required": ["gates"], "additionalProperties": false, "properties": { "gates": { "type": "boolean" } } },
+            "voices": {
+              "type": "object", "required": ["count", "ports"], "additionalProperties": false,
+              "properties": {
+                "count": { "type": "integer", "minimum": 0, "maximum": 8 },
+                "ports": { "type": "array", "maxItems": 4, "items": {
+                  "type": "object", "required": ["id", "label", "out"], "additionalProperties": false,
+                  "properties": { "id": { "type": "string", "pattern": "^[a-z0-9_]+-[a-z0-9_]+$" }, "label": { "type": "string" }, "out": { "type": "boolean" } }
+                } }
+              }
+            },
+            "modules": { "type": "array", "maxItems": 16, "items": {
+              "type": "object", "required": ["id", "type", "title", "ins", "outs"], "additionalProperties": false,
+              "properties": {
+                "id": { "$ref": "modId" }, "type": { "type": "string" }, "title": { "type": "string" },
+                "ins": { "type": "array", "items": { "$ref": "portName" } }, "outs": { "type": "array", "items": { "$ref": "portName" } }
+              }
+            } }
+          }
+        }
+      }
+    },
+    "ack": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "ack" }, "id": { "$ref": "id" } }
+    },
+    "nack": {
+      "type": "object", "required": ["v", "t", "id", "code"], "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "nack" }, "id": { "$ref": "id" },
+        "code": { "type": "string", "enum": ["bad_args", "refused_gate", "busy", "not_staff", "queue_full", "unknown"] }
+      }
+    },
+    "settings": {
+      "type": "object", "required": ["v", "t", "idle_timeout_s", "reduced_motion", "review_mode", "attract_sound"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: the staff settings the page itself follows, sent to every connection at connect and after each change (rigd keeps them in /data/staff.conf)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "settings" },
+        "idle_timeout_s": {"type": "integer", "minimum": 30, "maximum": 600},
+        "reduced_motion": {"type": "boolean"},
+        "review_mode": {"type": "boolean"},
+        "attract_sound": {"type": "boolean"}
+      }
+    },
+    "staff": {
+      "type": "object", "required": ["v", "t", "authed", "tries_left", "lockout_s"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: the staff session's state, sent only to the connection concerned: after staff.auth (right or wrong), after each staff change and on staff.close; settings only when authed",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff" },
+        "authed": {"type": "boolean"},
+        "tries_left": {"type": "integer", "minimum": 0, "maximum": 5},
+        "lockout_s": {"type": "integer", "minimum": 0, "maximum": 30},
+        "settings": {"type": "object", "required": ["ceiling_dba", "ceiling_max_dba", "quiet_hours", "muted"], "additionalProperties": false, "properties": {"ceiling_dba": {"$ref": "dba"}, "ceiling_max_dba": {"$ref": "dba"}, "quiet_hours": {"type": "object", "required": ["from", "to", "dba"], "additionalProperties": false, "properties": {"from": {"$ref": "hhmm"}, "to": {"$ref": "hhmm"}, "dba": {"$ref": "dba"}}}, "muted": {"type": "boolean"}}},
+        "saved": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "client": {
+    "keys.touch": {
+      "type": "object", "required": ["v", "t", "bits"], "additionalProperties": false,
+      "description": "the on-screen keyboard's whole state (level, not edges), bit k = key k, at every change and at 4 Hz. rigd treats a page that has sent nothing for over 1 s as having released its keys, and one silent for 10 s as gone (the no-page mute, ui_absent_muted), so a frozen page cannot hold a note (QA-ADV-07): keep the 4 Hz refresh running with no key down",
+      "properties": { "v": { "const": 1 }, "t": { "const": "keys.touch" }, "bits": { "$ref": "hex64" } }
+    },
+    "machine.speed": {
+      "type": "object", "required": ["v", "t", "id", "position"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "machine.speed" }, "id": { "$ref": "id" }, "position": { "$ref": "speedId" } }
+    },
+    "machine.step": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "machine.step" }, "id": { "$ref": "id" } }
+    },
+    "machine.home": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "machine.home" }, "id": { "$ref": "id" } }
+    },
+    "patch.connect": {
+      "type": "object", "required": ["v", "t", "id", "from", "to"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "patch.connect" }, "id": { "$ref": "id" }, "from": { "$ref": "jack" }, "to": { "$ref": "jack" } }
+    },
+    "patch.disconnect": {
+      "type": "object", "required": ["v", "t", "id", "from", "to"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "patch.disconnect" }, "id": { "$ref": "id" }, "from": { "$ref": "jack" }, "to": { "$ref": "jack" } }
+    },
+    "patch.load": {
+      "type": "object", "required": ["v", "t", "id", "slug"], "additionalProperties": false,
+      "properties": { "v": { "const": 1 }, "t": { "const": "patch.load" }, "id": { "$ref": "id" }, "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" } }
+    },
+    "audio.volume": {
+      "type": "object", "required": ["v", "t", "id", "db"], "additionalProperties": false,
+      "description": "extension (AUDIO-3, KP-06), host lane: the visitor volume control, in dB below the staff ceiling (0 = at the ceiling; the safety limiter still holds the ceiling)",
+      "properties": { "v": { "const": 1 }, "t": { "const": "audio.volume" }, "id": { "$ref": "id" }, "db": { "type": "number", "minimum": -40, "maximum": 0 } }
+    },
+    "audio.mute": {
+      "type": "object", "required": ["v", "t", "id", "on"], "additionalProperties": false,
+      "description": "extension (AUDIO-3, KP-06), host lane: the visible visitor mute, separate from the staff mute; silent within 100 ms",
+      "properties": { "v": { "const": 1 }, "t": { "const": "audio.mute" }, "id": { "$ref": "id" }, "on": { "type": "boolean" } }
+    },
+    "staff.auth": {
+      "type": "object", "required": ["v", "t", "id", "pin"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: open a staff session on this connection. A wrong PIN is nack not_staff; 5 wrong tries lock the staff screen for 30 s (nack not_staff, and a staff message with lockout_s). rigd checks the PIN against a hash on /data; the PIN is never in the repo (KP-07).",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.auth" },
+        "id": {"$ref": "id"},
+        "pin": {"type": "string", "pattern": "^[0-9]{4,8}$"}
+      }
+    },
+    "staff.close": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: end the staff session",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.close" },
+        "id": {"$ref": "id"}
+      }
+    },
+    "staff.ceiling": {
+      "type": "object", "required": ["v", "t", "id", "dba"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: the volume ceiling (STAFF-2); rigd clamps it to the hardware maximum",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.ceiling" },
+        "id": {"$ref": "id"},
+        "dba": {"$ref": "dba"}
+      }
+    },
+    "staff.quiet_hours": {
+      "type": "object", "required": ["v", "t", "id", "from", "to", "dba"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: quiet hours and their lower ceiling (KP-08)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.quiet_hours" },
+        "id": {"$ref": "id"},
+        "from": {"$ref": "hhmm"},
+        "to": {"$ref": "hhmm"},
+        "dba": {"$ref": "dba"}
+      }
+    },
+    "staff.idle_timeout": {
+      "type": "object", "required": ["v", "t", "id", "s"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: seconds without a touch or key before the station starts over (KP-08)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.idle_timeout" },
+        "id": {"$ref": "id"},
+        "s": {"type": "integer", "minimum": 30, "maximum": 600}
+      }
+    },
+    "staff.attract_sound": {
+      "type": "object", "required": ["v", "t", "id", "on"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: the optional quiet attract pattern; off by default (A-4, KP-08)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.attract_sound" },
+        "id": {"$ref": "id"},
+        "on": {"type": "boolean"}
+      }
+    },
+    "staff.reduced_motion": {
+      "type": "object", "required": ["v", "t", "id", "on"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: reduced motion on every screen (KP-08, NFR-10); not in ARCHITECTURE 4.4's list",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.reduced_motion" },
+        "id": {"$ref": "id"},
+        "on": {"type": "boolean"}
+      }
+    },
+    "staff.mute": {
+      "type": "object", "required": ["v", "t", "id", "on"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: mute the output (the safety chain's mute stage); not in ARCHITECTURE 4.4's list",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.mute" },
+        "id": {"$ref": "id"},
+        "on": {"type": "boolean"}
+      }
+    },
+    "staff.test_tone": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: rigd plays its test tone through the limiter, at most 3 s, under the ceiling (UX 5.11). The page makes no sound; rigd does",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.test_tone" },
+        "id": {"$ref": "id"}
+      }
+    },
+    "staff.restart": {
+      "type": "object", "required": ["v", "t", "id", "what"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: restart the emulated computer (reload the image) or the whole station stack (KP-09)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.restart" },
+        "id": {"$ref": "id"},
+        "what": {"type": "string", "enum": ["computer", "station"]}
+      }
+    },
+    "staff.review_mode": {
+      "type": "object", "required": ["v", "t", "id", "on"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: review mode: draft content visible, a persistent banner, no visitors (CT-07, KP-09)",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.review_mode" },
+        "id": {"$ref": "id"},
+        "on": {"type": "boolean"}
+      }
+    },
+    "staff.save_preset": {
+      "type": "object", "required": ["v", "t", "id"], "additionalProperties": false,
+      "description": "extension (KP-07 to KP-09, CT-07), PROPOSED by the UI lane: save the live patch as a preset pair in /data/presets/ (PATCH-6, KP-09). rigd names it staff-YYYYMMDD-HHMM because the floor has no keyboard; the reply is a staff message whose saved field is the slug",
+      "properties": {
+        "v": { "const": 1 }, "t": { "const": "staff.save_preset" },
+        "id": {"$ref": "id"}
+      }
+    }
+  }
+}

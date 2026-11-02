@@ -1,0 +1,43 @@
+#!/usr/sbin/nft -f
+#
+# seastones: default-deny inbound (KIOSK-6, NFR-12, GAT-03; ported from the Model 4 kiosk's
+# model4-kiosk.nft). Installed as /etc/nftables.d/seastones.nft and included from
+# /etc/nftables.conf by scripts/install-station.sh. Only our own table is flushed: another
+# table on the box is not ours to delete.
+#
+# Everything the exhibit does is on loopback: the page on 127.0.0.1:8080 and rigd's WebSocket
+# on 127.0.0.1:7690. Both also bind loopback only and their units deny every non-local address;
+# this is the third layer.
+
+table inet seastones
+delete table inet seastones
+
+table inet seastones {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        iif lo accept
+        ct state established,related accept
+        ct state invalid drop
+
+        # Enough ICMP to be diagnosable from the next desk without being reachable.
+        ip protocol icmp icmp type { echo-request, destination-unreachable, time-exceeded } accept
+        ip6 nexthdr icmpv6 icmpv6 type { echo-request, destination-unreachable, packet-too-big, time-exceeded, nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert } accept
+
+        # Everything else is dropped without a reject, so a scanner learns nothing.
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+    }
+
+    chain output {
+        # Default-deny outbound too (SYS-09): nothing on the floor talks to anything, not DNS,
+        # not DHCP, not an update check. (The Model 4 kiosk allowed output; this exhibit's
+        # test plan does not.) GAT-03 (c) still measures it with a 24 h capture on the box.
+        type filter hook output priority filter; policy drop;
+
+        oif lo accept
+        ct state established,related accept
+    }
+}

@@ -1,0 +1,70 @@
+# Draft 37-key scan loop, hand-listed for tools/cycle-calc.py (SP-S4B). NOT the program.
+#
+# Shape from ARCHITECTURE 5.6. Polled I/O, no interrupts. The real program is VS-09 (mono) and
+# PO-03/PO-04 (4 and 8 voices); its listing replaces this sketch once PO-01 exists. Register use
+# is assumed: the five previous key rows are kept in registers, the voice table and pitch table in
+# memory (RX, not indexed in the cost model).
+#
+# Variables (override with --set NAME=INT):
+set N = 4        # voices (4 is the adopted floor default; 8 is the ADR-003 default map)
+set C = 0        # keys that changed since the last pass (presses; releases cost about the same)
+set R = 0        # key rows (bytes) that contain at least one change, 0..5
+set S = 0        # 1 when the score player is active and a PIC tick has elapsed
+set K = 5        # key rows: 37 keys in 5 bytes
+
+*@block read-the-keys
+OCR                      # KEYS: reset the row pointer (auto-advance)
+RDR      xK              # read one row byte into a register
+
+*@block what-changed
+LHR      xK              # copy the new row
+XHR      xK              # changed = new XOR old
+BTFS     x(K-R) taken    # row unchanged: skip
+BTFS     xR              # row changed: fall through
+# per changed row: walk its 8 bits
+LIS      xR
+SRLS     x(8*R) n=1      # next bit into carry
+BFFS     x(8*R)          # bit clear: next (cost as not-taken, conservative)
+SIS      x(8*R)
+BTBS     x(8*R) taken    # loop over the 8 bits
+LHR      xR              # new row becomes old row
+
+*@block find-a-voice
+# per changed key: is it a press? then look for a free voice, else steal the oldest
+THI      xC
+BTC      xC
+LIS      xC
+LH       x(N*C)          # voice key slot
+CLHI     x(N*C)
+BTC      x(N*C)
+AIS      x(N*C)
+# no free voice (worst case): second pass for the oldest
+LH       x(N*C)          # voice age
+CLHR     x(N*C)
+BTCR     x(N*C)
+AIS      x(N*C)
+
+*@block write-to-the-synth
+LH       xC              # pitch table entry for the key
+AH       xC              # transpose
+OCR      xC              # DAC: select channel
+WHR      xC              # DAC: write the 16-bit code
+LH       xC              # gate image
+OHR      xC              # set this voice's bit
+OCR      xC              # GATE latch
+WHR      xC
+STH      x(2*C)          # voice table: key, age
+
+*@block play-the-score
+LH                       # PIC tick count
+CLH
+BTC      x(1-S) taken    # no tick: skip the score
+BTC      xS
+LH       x(6*S)          # one score record: time, channel, value (sketch)
+OCR      xS
+WHR      xS
+AIS      xS
+STH      xS
+
+*@block go-round-again
+BFC      taken           # B LOOP

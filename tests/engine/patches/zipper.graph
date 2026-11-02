@@ -1,0 +1,16 @@
+graph 1
+# MACH-3 / PM-07: one sine voice whose pitch also follows the detune lane (D/A 13), so the
+# steps routine (switches: routine 2) moves it in the converter's own steps
+module osc vco
+module eg env
+module amp vca
+module o out
+param eg attack 0.002
+param eg sustain 1
+param o level 0.5
+cable dac.0 osc.pitch
+cable dac.13 osc.mod
+cable dac.4 eg.gate
+cable osc.sine amp.in
+cable eg.out amp.cv
+cable amp.out o.l
